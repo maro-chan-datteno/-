@@ -1,0 +1,1448 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Kakeibo</title>
+
+<style>
+:root{
+  --bg:#f3f6f8;
+  --panel:#ffffff;
+  --text:#1f2937;
+  --muted:#6b7280;
+  --line:#d8dee6;
+  --income:#2563eb;
+  --expense:#dc2626;
+  --budget:#f59e0b;
+  --actual:#0f766e;
+  --diary:#16a34a;
+  --dark:#263241;
+  --soft-income:#eff6ff;
+  --soft-expense:#fff1f2;
+  --soft-budget:#fff7ed;
+  --soft-actual:#ecfdf5;
+  --soft-gray:#f8fafc;
+}
+
+*{box-sizing:border-box;}
+
+body{
+  margin:0;
+  padding:12px;
+  background:var(--bg);
+  color:var(--text);
+  font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+}
+
+.app{
+  max-width:1320px;
+  margin:0 auto;
+  display:grid;
+  grid-template-columns:minmax(320px,430px) 1fr;
+  gap:18px;
+  align-items:start;
+}
+
+.panel{
+  background:var(--panel);
+  border-radius:20px;
+  padding:18px;
+  box-shadow:0 10px 28px rgba(31,41,55,.10);
+}
+
+.right-panel{
+  display:grid;
+  gap:18px;
+}
+
+.calendar-panel{
+  position:sticky;
+  top:12px;
+  z-index:1;
+}
+
+h1,h2,h3{line-height:1.25;}
+
+.panel-title{
+  margin:0 0 14px;
+  font-size:22px;
+}
+
+.menu-title{
+  margin:22px 0 8px;
+  color:var(--muted);
+  font-size:14px;
+  font-weight:900;
+}
+
+.section-title{
+  margin:0 0 12px;
+  font-size:18px;
+}
+
+button{
+  min-height:44px;
+  border:0;
+  border-radius:13px;
+  color:white;
+  font-weight:850;
+  cursor:pointer;
+  touch-action:manipulation;
+}
+
+button:disabled{
+  opacity:.55;
+  cursor:not-allowed;
+}
+
+.full-button{
+  width:100%;
+  margin-top:7px;
+  padding:12px;
+  font-size:15px;
+}
+
+.mini-button{
+  width:auto;
+  min-height:34px;
+  padding:7px 10px;
+  font-size:12px;
+}
+
+.btn-income{background:var(--income);}
+.btn-expense{background:var(--expense);}
+.btn-budget{background:var(--budget);}
+.btn-actual{background:var(--actual);}
+.btn-diary{background:var(--diary);}
+.btn-delete{background:#374151;}
+.btn-month{background:var(--dark);}
+.btn-light{
+  background:#eef2f7;
+  color:#263241;
+}
+
+input,select,textarea{
+  width:100%;
+  min-height:44px;
+  margin-bottom:10px;
+  padding:12px;
+  border:2px solid var(--line);
+  border-radius:13px;
+  background:#fff;
+  font-size:16px;
+}
+
+label{
+  display:block;
+  margin:4px 0 6px;
+  color:var(--muted);
+  font-size:13px;
+  font-weight:800;
+}
+
+textarea{
+  min-height:118px;
+  resize:vertical;
+}
+
+.entry-form{
+  max-height:0;
+  opacity:0;
+  overflow:hidden;
+  transition:max-height .25s ease,opacity .2s ease,padding .2s ease,margin .2s ease;
+}
+
+.entry-form.show{
+  max-height:1000px;
+  opacity:1;
+  margin-top:8px;
+  padding:12px;
+  border-radius:16px;
+  border:2px solid var(--line);
+  background:var(--soft-gray);
+}
+
+.entry-form.budget.show{
+  border-color:var(--budget);
+  background:var(--soft-budget);
+}
+
+.entry-form.actual.show{
+  border-color:var(--actual);
+  background:var(--soft-actual);
+}
+
+.entry-form.diary.show{
+  border-color:var(--diary);
+  background:#f0fdf4;
+}
+
+.form-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:10px;
+}
+
+.repeat-fields{
+  display:none;
+}
+
+.repeat-fields.show{
+  display:block;
+}
+
+.month-nav{
+  display:grid;
+  grid-template-columns:48px 1fr 48px;
+  align-items:center;
+  gap:10px;
+  margin-bottom:12px;
+}
+
+.month-nav h2{
+  margin:0;
+  text-align:center;
+  font-size:22px;
+}
+
+.summary{
+  display:grid;
+  gap:10px;
+  margin-bottom:14px;
+}
+
+.summary-main{
+  padding:14px;
+  border-radius:16px;
+  background:#f1f5f9;
+}
+
+.summary-main h3{
+  margin:0 0 10px;
+  font-size:17px;
+}
+
+.summary-grid{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:8px;
+}
+
+.summary-card{
+  min-width:0;
+  padding:10px;
+  border-radius:14px;
+  background:#fff;
+  border:1px solid #e5e7eb;
+}
+
+.summary-card span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+}
+
+.summary-card strong{
+  display:block;
+  margin-top:4px;
+  font-size:17px;
+  overflow-wrap:anywhere;
+}
+
+.summary-balance{
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  margin-top:10px;
+  padding-top:10px;
+  border-top:1px solid #dbe2ea;
+  font-weight:900;
+}
+
+.plus{color:var(--income);}
+.minus{color:var(--expense);}
+.budget-text{color:#a16207;}
+.actual-text{color:var(--actual);}
+
+#calendar{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:6px;
+}
+
+.week-name{
+  padding:4px 0;
+  color:var(--muted);
+  text-align:center;
+  font-size:13px;
+  font-weight:900;
+}
+
+.calendar-day{
+  min-height:138px;
+  padding:7px;
+  border:1px solid #e5e7eb;
+  border-radius:13px;
+  background:#fff;
+  overflow:hidden;
+  cursor:pointer;
+}
+
+.calendar-day.today{
+  border:2px solid var(--income);
+}
+
+.calendar-day.selected{
+  border:3px solid var(--income);
+  background:#eff6ff;
+  box-shadow:0 0 0 3px rgba(37,99,235,.14);
+}
+
+.calendar-date{
+  margin-bottom:6px;
+  font-weight:950;
+}
+
+.day-total{
+  display:grid;
+  gap:3px;
+  margin-bottom:5px;
+  font-size:12px;
+}
+
+.day-total-row{
+  display:flex;
+  justify-content:space-between;
+  gap:4px;
+}
+
+.entry-chip{
+  margin-top:5px;
+  padding:6px;
+  border-radius:11px;
+  font-size:12px;
+  border:1px solid #fed7aa;
+  background:rgba(255,247,237,.85);
+}
+
+.entry-chip.actual{
+  border-color:#bbf7d0;
+  background:rgba(236,253,245,.88);
+}
+
+.entry-chip.income{
+  border-color:#bfdbfe;
+  background:rgba(239,246,255,.90);
+}
+
+.entry-title{
+  font-weight:900;
+  overflow-wrap:anywhere;
+}
+
+.entry-meta{
+  color:var(--muted);
+  font-size:11px;
+}
+
+.entry-actions,.detail-actions,.modal-actions{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+  margin-top:7px;
+}
+
+.detail-panel{
+  max-height:360px;
+  overflow:auto;
+  -webkit-overflow-scrolling:touch;
+}
+
+.detail-header{
+  position:sticky;
+  top:0;
+  z-index:1;
+  display:flex;
+  justify-content:space-between;
+  gap:12px;
+  align-items:center;
+  padding-bottom:10px;
+  margin-bottom:10px;
+  background:var(--panel);
+  border-bottom:1px solid #e5e7eb;
+}
+
+.detail-group{
+  margin-bottom:14px;
+}
+
+.detail-group h3{
+  margin:0 0 8px;
+  font-size:16px;
+}
+
+.detail-item,.history-card,.diary-card{
+  margin-bottom:8px;
+  padding:12px;
+  border:1px solid #e5e7eb;
+  border-radius:15px;
+  background:#fff;
+}
+
+.detail-item.budget{
+  background:var(--soft-budget);
+}
+
+.detail-item.actual{
+  background:var(--soft-actual);
+}
+
+.history-card{
+  display:grid;
+  gap:5px;
+}
+
+.history-head{
+  display:flex;
+  justify-content:space-between;
+  gap:10px;
+  color:var(--muted);
+  font-size:13px;
+}
+
+.history-title{
+  font-weight:950;
+  overflow-wrap:anywhere;
+}
+
+.history-amount{
+  font-size:20px;
+  font-weight:950;
+}
+
+.tag-row{
+  display:flex;
+  flex-wrap:wrap;
+  gap:6px;
+}
+
+.tag{
+  width:max-content;
+  max-width:100%;
+  padding:3px 8px;
+  border-radius:999px;
+  background:#eef2f7;
+  font-size:12px;
+  color:#334155;
+}
+
+.diary-card{
+  border-left:5px solid var(--diary);
+  background:#f7fff8;
+}
+
+#moodSelect{
+  display:grid;
+  grid-template-columns:repeat(4,1fr);
+  gap:6px;
+  margin-bottom:10px;
+}
+
+#moodSelect button{
+  border:1px solid var(--line);
+  background:#fff;
+  color:#111827;
+  font-size:22px;
+}
+
+#moodSelect button.active{
+  border:2px solid var(--diary);
+  background:#dcfce7;
+}
+
+.empty{
+  padding:14px;
+  border:1px dashed var(--line);
+  border-radius:13px;
+  color:var(--muted);
+  text-align:center;
+}
+
+.modal-backdrop{
+  position:fixed;
+  inset:0;
+  display:none;
+  align-items:center;
+  justify-content:center;
+  padding:18px;
+  background:rgba(15,23,42,.42);
+  z-index:20;
+}
+
+.modal-backdrop.show{
+  display:flex;
+}
+
+.modal{
+  width:min(720px,90vw);
+  max-height:88vh;
+  overflow:auto;
+  padding:18px;
+  border-radius:22px;
+  background:#fff;
+  box-shadow:0 24px 60px rgba(15,23,42,.28);
+}
+
+.modal h2{
+  margin:0 0 14px;
+}
+
+@media(max-width:1080px){
+  .app{
+    grid-template-columns:1fr;
+  }
+
+  .calendar-panel{
+    position:static;
+  }
+}
+
+@media(max-width:760px){
+  body{padding:8px;}
+
+  .panel{
+    padding:14px;
+    border-radius:16px;
+  }
+
+  .form-grid,.summary-grid{
+    grid-template-columns:1fr 1fr;
+  }
+
+  .calendar-day{
+    min-height:118px;
+    padding:5px;
+    font-size:11px;
+  }
+
+  .day-total,.entry-chip{
+    font-size:10px;
+  }
+
+  .entry-meta{
+    font-size:10px;
+  }
+
+  .mini-button{
+    min-height:34px;
+    padding:7px 9px;
+  }
+
+  .month-nav h2{
+    font-size:18px;
+  }
+}
+
+@media(max-width:520px){
+  .summary-grid,.form-grid{
+    grid-template-columns:1fr;
+  }
+}
+</style>
+</head>
+
+<body>
+<div class="app">
+  <section class="panel">
+    <h1 class="panel-title">家計入力</h1>
+
+    <div class="menu-title">予算メニュー</div>
+    <button class="full-button btn-budget" onclick="openForm('budgetIncomeForm')">予算収入</button>
+    <form id="budgetIncomeForm" class="entry-form budget" onsubmit="saveFormTransaction(event,'budgetIncomeForm','budget','income','none')"></form>
+
+    <button class="full-button btn-budget" onclick="openForm('budgetExpenseForm')">予算支出</button>
+    <form id="budgetExpenseForm" class="entry-form budget" onsubmit="saveFormTransaction(event,'budgetExpenseForm','budget','expense','none')"></form>
+
+    <div class="menu-title">実績メニュー</div>
+    <button class="full-button btn-actual" onclick="openForm('actualIncomeForm')">実績収入</button>
+    <form id="actualIncomeForm" class="entry-form actual" onsubmit="saveFormTransaction(event,'actualIncomeForm','actual','income','none')"></form>
+
+    <button class="full-button btn-actual" onclick="openForm('actualExpenseForm')">実績支出</button>
+    <form id="actualExpenseForm" class="entry-form actual" onsubmit="saveFormTransaction(event,'actualExpenseForm','actual','expense','none')"></form>
+
+    <div class="menu-title">固定費メニュー</div>
+    <button class="full-button btn-income" onclick="openForm('fixedMonthlyForm')">毎月自動発生</button>
+    <form id="fixedMonthlyForm" class="entry-form budget" onsubmit="saveFormTransaction(event,'fixedMonthlyForm','budget','expense','monthly')"></form>
+
+    <button class="full-button btn-income" onclick="openForm('fixedYearlyForm')">毎年自動発生</button>
+    <form id="fixedYearlyForm" class="entry-form budget" onsubmit="saveFormTransaction(event,'fixedYearlyForm','budget','expense','yearly')"></form>
+
+    <button class="full-button btn-income" onclick="openForm('fixedDailyForm')">毎日自動発生</button>
+    <form id="fixedDailyForm" class="entry-form budget" onsubmit="saveFormTransaction(event,'fixedDailyForm','budget','expense','daily')"></form>
+
+    <div class="menu-title">日記メニュー</div>
+    <button class="full-button btn-diary" onclick="openForm('diaryForm')">日記を書く</button>
+    <div id="diaryForm" class="entry-form diary">
+      <div id="moodSelect">
+        <button type="button" onclick="selectMood(this,'😊')">😊</button>
+        <button type="button" onclick="selectMood(this,'😐')">😐</button>
+        <button type="button" onclick="selectMood(this,'😓')">😓</button>
+        <button type="button" onclick="selectMood(this,'😡')">😡</button>
+      </div>
+      <input type="hidden" id="mood">
+      <textarea id="diaryInput" placeholder="今日の出来事"></textarea>
+      <button class="full-button btn-diary" onclick="saveDiary()" type="button">日記保存</button>
+    </div>
+  </section>
+
+  <section class="right-panel">
+    <div class="panel calendar-panel">
+      <div class="month-nav">
+        <button class="btn-month" onclick="changeMonth(-1)" aria-label="前の月">‹</button>
+        <h2 id="monthTitle">予実サマリー</h2>
+        <button class="btn-month" onclick="changeMonth(1)" aria-label="次の月">›</button>
+      </div>
+      <div id="summary" class="summary"></div>
+      <div id="calendar"></div>
+    </div>
+
+    <div class="panel detail-panel" id="selectedDatePanel"></div>
+
+    <div class="panel">
+      <h2 class="section-title">家計履歴</h2>
+      <div id="historyList"></div>
+    </div>
+
+    <div class="panel">
+      <h2 class="section-title">日記履歴</h2>
+      <div id="diaryList"></div>
+    </div>
+  </section>
+</div>
+
+<div id="editModal" class="modal-backdrop" onclick="closeEditModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <h2>取引を編集</h2>
+    <form id="editForm" onsubmit="saveEditTransaction(event)">
+      <input type="hidden" id="editId">
+
+      <div class="form-grid">
+        <div>
+          <label for="editMode">区分</label>
+          <select id="editMode">
+            <option value="budget">予算</option>
+            <option value="actual">実績</option>
+          </select>
+        </div>
+        <div>
+          <label for="editType">種別</label>
+          <select id="editType">
+            <option value="income">収入</option>
+            <option value="expense">支出</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-grid">
+        <div>
+          <label for="editDate">日付</label>
+          <input type="date" id="editDate" required>
+        </div>
+        <div>
+          <label for="editAmount">金額</label>
+          <input type="number" id="editAmount" required>
+        </div>
+      </div>
+
+      <label for="editTitle">内容</label>
+      <input id="editTitle" required>
+
+      <label for="editCategory">カテゴリ</label>
+      <select id="editCategory"></select>
+
+      <label for="editRepeat">繰り返し</label>
+      <select id="editRepeat" onchange="syncEditRepeatFields()">
+        <option value="none">この日だけ</option>
+        <option value="daily">毎日</option>
+        <option value="monthly">毎月</option>
+        <option value="yearly">毎年</option>
+      </select>
+
+      <div id="editMonthlyFields" class="repeat-fields">
+        <label for="editMonthlyDay">毎月何日</label>
+        <input type="number" min="1" max="31" id="editMonthlyDay">
+      </div>
+
+      <div id="editYearlyFields" class="repeat-fields">
+        <div class="form-grid">
+          <div>
+            <label for="editYearlyMonth">毎年何月</label>
+            <select id="editYearlyMonth"></select>
+          </div>
+          <div>
+            <label for="editYearlyDay">毎年何日</label>
+            <input type="number" min="1" max="31" id="editYearlyDay">
+          </div>
+        </div>
+      </div>
+
+      <div class="modal-actions">
+        <button class="mini-button btn-actual" type="submit">更新</button>
+        <button class="mini-button btn-delete" type="button" onclick="deleteFromEditModal()">削除</button>
+        <button class="mini-button btn-light" type="button" onclick="hideEditModal()">閉じる</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+// ============================================================
+// 予算 vs 実績 家計簿
+// - transactions に予算/実績/繰り返しを統一保存
+// - 日付クリックで選択日詳細を表示
+// - 詳細/履歴/モーダルから編集・削除
+// - サーバ不要、localStorageのみ
+// ============================================================
+
+const STORAGE = {
+  transactions: 'transactions',
+  diaries: 'diaries'
+};
+
+const CATEGORIES = ['食費','日用品','交通費','娯楽','固定費','給与','その他'];
+const today = new Date().toISOString().split('T')[0];
+
+let calendarYear = new Date().getFullYear();
+let calendarMonth = new Date().getMonth();
+let selectedDate = today;
+let editingTransactionId = null;
+let transactions = [];
+let diaries = [];
+
+const getEl = id => document.getElementById(id);
+const yen = value => `${value.toLocaleString()}円`;
+const makeId = () => `tx_${Date.now()}_${Math.random().toString(36).slice(2,8)}`;
+
+function parseDate(dateString){
+  const [year,month,day] = dateString.split('-').map(Number);
+  return new Date(year,month - 1,day);
+}
+
+function toDateString(date){
+  return [
+    date.getFullYear(),
+    String(date.getMonth() + 1).padStart(2,'0'),
+    String(date.getDate()).padStart(2,'0')
+  ].join('-');
+}
+
+function signedAmount(tx){
+  return tx.type === 'expense' ? -Math.abs(tx.amount) : Math.abs(tx.amount);
+}
+
+function repeatLabel(tx){
+  if(tx.repeat === 'daily') return '毎日';
+  if(tx.repeat === 'monthly') return `毎月${tx.monthlyDay}日`;
+  if(tx.repeat === 'yearly') return `毎年${tx.yearlyMonth}月${tx.yearlyDay}日`;
+  return 'この日だけ';
+}
+
+function modeLabel(mode){
+  return mode === 'budget' ? '予算' : '実績';
+}
+
+function typeLabel(type){
+  return type === 'income' ? '収入' : '支出';
+}
+
+function isSameMonth(dateString,year,month){
+  const date = parseDate(dateString);
+  return date.getFullYear() === year && date.getMonth() === month;
+}
+
+function sumSigned(items){
+  return items.reduce((sum,item) => sum + signedAmount(item),0);
+}
+
+function sumBy(items,mode,type){
+  return items
+    .filter(item => item.mode === mode && item.type === type)
+    .reduce((sum,item) => sum + Math.abs(item.amount),0);
+}
+
+// ===== localStorage =====================================================
+function loadData(){
+  const savedTransactions = JSON.parse(localStorage.getItem(STORAGE.transactions)) || null;
+  diaries = JSON.parse(localStorage.getItem(STORAGE.diaries)) || [];
+
+  if(savedTransactions){
+    transactions = savedTransactions.map(normalizeTransaction);
+    return;
+  }
+
+  // 旧データ互換: records は実績、schedules/budgets は予算へ移行。
+  const records = JSON.parse(localStorage.getItem('records')) || [];
+  const schedules = JSON.parse(localStorage.getItem('schedules')) || [];
+  const budgets = JSON.parse(localStorage.getItem('budgets')) || [];
+
+  transactions = [
+    ...records.map(record => normalizeTransaction({
+      mode:'actual',
+      type:record.type || (Number(record.amount) < 0 ? 'expense' : 'income'),
+      title:record.title || record.desc || '',
+      category:record.category || 'その他',
+      amount:Math.abs(Number(record.amount) || 0),
+      date:record.date || today,
+      repeat:'none',
+      createdAt:Date.now()
+    })),
+    ...[...schedules,...budgets].map(schedule => normalizeTransaction({
+      mode:schedule.mode || 'budget',
+      type:schedule.type || 'expense',
+      title:schedule.title || schedule.desc || '',
+      category:schedule.category || 'その他',
+      amount:Math.abs(Number(schedule.amount) || 0),
+      date:schedule.startDate || schedule.date || today,
+      repeat:schedule.repeat || schedule.repeatType || 'none',
+      monthlyDay:schedule.monthlyDay,
+      yearlyMonth:schedule.yearlyMonth,
+      yearlyDay:schedule.yearlyDay,
+      createdAt:Date.now()
+    }))
+  ];
+
+  saveData();
+}
+
+function normalizeTransaction(tx){
+  const date = tx.date || today;
+  const parsed = parseDate(date);
+  const repeat = tx.repeat || 'none';
+
+  return {
+    id:tx.id || makeId(),
+    mode:tx.mode === 'actual' ? 'actual' : 'budget',
+    type:tx.type === 'income' ? 'income' : 'expense',
+    title:tx.title || tx.desc || '名称なし',
+    category:tx.category || 'その他',
+    amount:Math.abs(Number(tx.amount) || 0),
+    date,
+    repeat,
+    monthlyDay:repeat === 'monthly' ? Number(tx.monthlyDay || parsed.getDate()) : null,
+    yearlyMonth:repeat === 'yearly' ? Number(tx.yearlyMonth || parsed.getMonth() + 1) : null,
+    yearlyDay:repeat === 'yearly' ? Number(tx.yearlyDay || parsed.getDate()) : null,
+    createdAt:Number(tx.createdAt) || Date.now()
+  };
+}
+
+function saveData(){
+  localStorage.setItem(STORAGE.transactions,JSON.stringify(transactions));
+  localStorage.setItem(STORAGE.diaries,JSON.stringify(diaries));
+}
+
+// ===== フォーム管理 =====================================================
+function setup(){
+  buildTransactionForms();
+  fillCategoryOptions('editCategory');
+  fillYearOptions('editYearlyMonth');
+  renderAll();
+}
+
+function buildTransactionForms(){
+  const configs = [
+    ['budgetIncomeForm','予算収入','budget','income','none'],
+    ['budgetExpenseForm','予算支出','budget','expense','none'],
+    ['actualIncomeForm','実績収入','actual','income','none'],
+    ['actualExpenseForm','実績支出','actual','expense','none'],
+    ['fixedMonthlyForm','毎月自動発生','budget','expense','monthly'],
+    ['fixedYearlyForm','毎年自動発生','budget','expense','yearly'],
+    ['fixedDailyForm','毎日自動発生','budget','expense','daily']
+  ];
+
+  configs.forEach(([id,title,mode,type,repeat]) => {
+    getEl(id).innerHTML = transactionFormHtml(id,title,mode,type,repeat);
+    fillCategoryOptions(`${id}_category`,type === 'income' ? '給与' : '固定費');
+    fillYearOptions(`${id}_yearlyMonth`);
+    getEl(`${id}_date`).value = selectedDate;
+    getEl(`${id}_repeat`).value = repeat;
+    syncFormRepeatFields(id);
+  });
+}
+
+function transactionFormHtml(id,title,mode,type,repeat){
+  const fixedTypeSelect = repeat === 'none'
+    ? ''
+    : `
+      <label for="${id}_type">種別</label>
+      <select id="${id}_type">
+        <option value="expense" ${type === 'expense' ? 'selected' : ''}>支出</option>
+        <option value="income" ${type === 'income' ? 'selected' : ''}>収入</option>
+      </select>
+    `;
+
+  return `
+    <h3 class="section-title">${title}</h3>
+    ${fixedTypeSelect}
+    <div class="form-grid">
+      <div>
+        <label for="${id}_date">日付</label>
+        <input type="date" id="${id}_date" required>
+      </div>
+      <div>
+        <label for="${id}_amount">金額</label>
+        <input type="number" id="${id}_amount" placeholder="65000" required>
+      </div>
+    </div>
+    <label for="${id}_title">内容</label>
+    <input id="${id}_title" placeholder="家賃、給与、食費など" required>
+    <label for="${id}_category">カテゴリ</label>
+    <select id="${id}_category"></select>
+    <label for="${id}_repeat">繰り返し</label>
+    <select id="${id}_repeat" onchange="syncFormRepeatFields('${id}')">
+      <option value="none">この日だけ</option>
+      <option value="daily">毎日</option>
+      <option value="monthly">毎月</option>
+      <option value="yearly">毎年</option>
+    </select>
+    <div id="${id}_monthlyWrap" class="repeat-fields">
+      <label for="${id}_monthlyDay">毎月何日</label>
+      <input type="number" min="1" max="31" id="${id}_monthlyDay" placeholder="25">
+    </div>
+    <div id="${id}_yearlyWrap" class="repeat-fields">
+      <div class="form-grid">
+        <div>
+          <label for="${id}_yearlyMonth">毎年何月</label>
+          <select id="${id}_yearlyMonth"></select>
+        </div>
+        <div>
+          <label for="${id}_yearlyDay">毎年何日</label>
+          <input type="number" min="1" max="31" id="${id}_yearlyDay" placeholder="12">
+        </div>
+      </div>
+    </div>
+    <button class="full-button ${mode === 'budget' ? 'btn-budget' : 'btn-actual'}" type="submit">保存</button>
+  `;
+}
+
+function fillCategoryOptions(id,selected='その他'){
+  getEl(id).innerHTML = CATEGORIES
+    .map(category => `<option ${category === selected ? 'selected' : ''}>${category}</option>`)
+    .join('');
+}
+
+function fillYearOptions(id){
+  getEl(id).innerHTML = Array.from({length:12},(_,index) => {
+    const month = index + 1;
+    return `<option value="${month}">${month}月</option>`;
+  }).join('');
+}
+
+function openForm(id){
+  document.querySelectorAll('.entry-form').forEach(form => {
+    form.classList.toggle('show',form.id === id && !form.classList.contains('show'));
+  });
+
+  if(id !== 'diaryForm' && getEl(`${id}_date`)){
+    getEl(`${id}_date`).value = selectedDate;
+    syncFormRepeatFields(id);
+  }
+}
+
+function syncFormRepeatFields(id){
+  const repeat = getEl(`${id}_repeat`).value;
+  const date = parseDate(getEl(`${id}_date`).value || selectedDate || today);
+  getEl(`${id}_monthlyWrap`).classList.toggle('show',repeat === 'monthly');
+  getEl(`${id}_yearlyWrap`).classList.toggle('show',repeat === 'yearly');
+
+  if(!getEl(`${id}_monthlyDay`).value){
+    getEl(`${id}_monthlyDay`).value = date.getDate();
+  }
+
+  getEl(`${id}_yearlyMonth`).value = date.getMonth() + 1;
+  if(!getEl(`${id}_yearlyDay`).value){
+    getEl(`${id}_yearlyDay`).value = date.getDate();
+  }
+}
+
+function saveFormTransaction(event,formId,mode,type,defaultRepeat){
+  event.preventDefault();
+
+  const date = getEl(`${formId}_date`).value;
+  const parsed = parseDate(date);
+  const repeat = getEl(`${formId}_repeat`).value || defaultRepeat;
+  const finalType = getEl(`${formId}_type`) ? getEl(`${formId}_type`).value : type;
+
+  transactions.push(normalizeTransaction({
+    id:makeId(),
+    mode,
+    type:finalType,
+    title:getEl(`${formId}_title`).value.trim(),
+    category:getEl(`${formId}_category`).value,
+    amount:Number(getEl(`${formId}_amount`).value),
+    date,
+    repeat,
+    monthlyDay:repeat === 'monthly' ? Number(getEl(`${formId}_monthlyDay`).value || parsed.getDate()) : null,
+    yearlyMonth:repeat === 'yearly' ? Number(getEl(`${formId}_yearlyMonth`).value || parsed.getMonth() + 1) : null,
+    yearlyDay:repeat === 'yearly' ? Number(getEl(`${formId}_yearlyDay`).value || parsed.getDate()) : null,
+    createdAt:Date.now()
+  }));
+
+  resetTransactionForm(formId);
+  closeAllForms();
+  saveData();
+  renderAll();
+}
+
+function resetTransactionForm(formId){
+  getEl(`${formId}_title`).value = '';
+  getEl(`${formId}_amount`).value = '';
+  getEl(`${formId}_date`).value = selectedDate;
+}
+
+function closeAllForms(){
+  document.querySelectorAll('.entry-form').forEach(form => form.classList.remove('show'));
+}
+
+// ===== 繰り返し展開 =====================================================
+function isTransactionMatchDate(tx,date){
+  const start = parseDate(tx.date);
+  if(date < start) return false;
+
+  if(tx.repeat === 'none'){
+    return toDateString(date) === tx.date;
+  }
+
+  if(tx.repeat === 'daily'){
+    return true;
+  }
+
+  if(tx.repeat === 'monthly'){
+    return date.getDate() === Number(tx.monthlyDay);
+  }
+
+  if(tx.repeat === 'yearly'){
+    return (
+      date.getMonth() + 1 === Number(tx.yearlyMonth) &&
+      date.getDate() === Number(tx.yearlyDay)
+    );
+  }
+
+  return false;
+}
+
+function expandTransactionsForDate(date){
+  const dateString = toDateString(date);
+  return transactions
+    .map((tx,index) => ({...tx,index,occurrenceDate:dateString}))
+    .filter(tx => isTransactionMatchDate(tx,date));
+}
+
+function expandTransactionsForMonth(year,month){
+  const lastDay = new Date(year,month + 1,0).getDate();
+  const items = [];
+
+  for(let day = 1; day <= lastDay; day++){
+    items.push(...expandTransactionsForDate(new Date(year,month,day)));
+  }
+
+  return items;
+}
+
+// ===== transaction CRUD =================================================
+function updateTransaction(id,updatedData){
+  const index = transactions.findIndex(tx => tx.id === id);
+  if(index === -1) return;
+  transactions[index] = normalizeTransaction({
+    ...transactions[index],
+    ...updatedData,
+    id
+  });
+  saveData();
+  renderAll();
+}
+
+function deleteTransactionById(id){
+  const tx = transactions.find(item => item.id === id);
+  if(!tx) return;
+
+  if(tx.repeat !== 'none'){
+    const ok = confirm('この固定費定義を削除しますか？');
+    if(!ok) return;
+  }
+
+  transactions = transactions.filter(item => item.id !== id);
+  if(editingTransactionId === id){
+    hideEditModal();
+  }
+  saveData();
+  renderAll();
+}
+
+function convertBudgetToActual(id,occurrenceDate){
+  const budget = transactions.find(tx => tx.id === id);
+  if(!budget || budget.mode !== 'budget') return;
+
+  transactions.push(normalizeTransaction({
+    mode:'actual',
+    type:budget.type,
+    title:budget.title,
+    category:budget.category,
+    amount:budget.amount,
+    date:occurrenceDate,
+    repeat:'none',
+    createdAt:Date.now()
+  }));
+
+  saveData();
+  renderAll();
+}
+
+// ===== 編集モーダル =====================================================
+function openEditModal(id){
+  const tx = transactions.find(item => item.id === id);
+  if(!tx) return;
+
+  editingTransactionId = id;
+  getEl('editId').value = id;
+  getEl('editMode').value = tx.mode;
+  getEl('editType').value = tx.type;
+  getEl('editDate').value = tx.date;
+  getEl('editAmount').value = tx.amount;
+  getEl('editTitle').value = tx.title;
+  fillCategoryOptions('editCategory',tx.category);
+  getEl('editRepeat').value = tx.repeat;
+  getEl('editMonthlyDay').value = tx.monthlyDay || parseDate(tx.date).getDate();
+  getEl('editYearlyMonth').value = tx.yearlyMonth || parseDate(tx.date).getMonth() + 1;
+  getEl('editYearlyDay').value = tx.yearlyDay || parseDate(tx.date).getDate();
+  syncEditRepeatFields();
+  getEl('editModal').classList.add('show');
+}
+
+function syncEditRepeatFields(){
+  const repeat = getEl('editRepeat').value;
+  const date = parseDate(getEl('editDate').value || today);
+  getEl('editMonthlyFields').classList.toggle('show',repeat === 'monthly');
+  getEl('editYearlyFields').classList.toggle('show',repeat === 'yearly');
+
+  if(!getEl('editMonthlyDay').value){
+    getEl('editMonthlyDay').value = date.getDate();
+  }
+  if(!getEl('editYearlyDay').value){
+    getEl('editYearlyDay').value = date.getDate();
+  }
+}
+
+function saveEditTransaction(event){
+  event.preventDefault();
+  const id = getEl('editId').value;
+  const repeat = getEl('editRepeat').value;
+  const date = getEl('editDate').value;
+  const parsed = parseDate(date);
+
+  updateTransaction(id,{
+    mode:getEl('editMode').value,
+    type:getEl('editType').value,
+    date,
+    amount:Number(getEl('editAmount').value),
+    title:getEl('editTitle').value.trim(),
+    category:getEl('editCategory').value,
+    repeat,
+    monthlyDay:repeat === 'monthly' ? Number(getEl('editMonthlyDay').value || parsed.getDate()) : null,
+    yearlyMonth:repeat === 'yearly' ? Number(getEl('editYearlyMonth').value || parsed.getMonth() + 1) : null,
+    yearlyDay:repeat === 'yearly' ? Number(getEl('editYearlyDay').value || parsed.getDate()) : null
+  });
+  hideEditModal();
+}
+
+function deleteFromEditModal(){
+  if(editingTransactionId){
+    deleteTransactionById(editingTransactionId);
+  }
+}
+
+function closeEditModal(event){
+  if(event.target.id === 'editModal'){
+    hideEditModal();
+  }
+}
+
+function hideEditModal(){
+  editingTransactionId = null;
+  getEl('editModal').classList.remove('show');
+}
+
+// ===== サマリー =========================================================
+function getMonthSummary(){
+  const expanded = expandTransactionsForMonth(calendarYear,calendarMonth);
+  const budgetIncome = sumBy(expanded,'budget','income');
+  const budgetExpense = sumBy(expanded,'budget','expense');
+  const actualIncome = sumBy(expanded,'actual','income');
+  const actualExpense = sumBy(expanded,'actual','expense');
+  const budgetBalance = budgetIncome - budgetExpense;
+  const actualBalance = actualIncome - actualExpense;
+
+  return {
+    budgetIncome,
+    budgetExpense,
+    actualIncome,
+    actualExpense,
+    budgetBalance,
+    actualBalance,
+    variance:actualBalance - budgetBalance
+  };
+}
+
+function renderSummary(){
+  const s = getMonthSummary();
+  getEl('monthTitle').textContent = `${calendarYear}年${calendarMonth + 1}月 予実サマリー`;
+
+  getEl('summary').innerHTML = `
+    <div class="summary-main">
+      <h3>予算 vs 実績</h3>
+      <div class="summary-grid">
+        ${summaryCard('予算収入',s.budgetIncome,'plus')}
+        ${summaryCard('予算支出',s.budgetExpense,'budget-text')}
+        ${summaryCard('実績収入',s.actualIncome,'plus')}
+        ${summaryCard('実績支出',s.actualExpense,'minus')}
+      </div>
+      <div class="summary-balance">
+        <span>予算収支 ${yen(s.budgetBalance)}</span>
+        <span>実績収支 ${yen(s.actualBalance)}</span>
+      </div>
+      <div class="summary-balance">
+        <span>差額</span>
+        <span class="${s.variance < 0 ? 'minus' : 'plus'}">${yen(s.variance)}</span>
+      </div>
+    </div>
+  `;
+}
+
+function summaryCard(label,value,className){
+  return `
+    <div class="summary-card">
+      <span>${label}</span>
+      <strong class="${className}">${yen(value)}</strong>
+    </div>
+  `;
+}
+
+// ===== カレンダー / 選択日 ==============================================
+function changeMonth(diff){
+  calendarMonth += diff;
+
+  if(calendarMonth < 0){
+    calendarMonth = 11;
+    calendarYear--;
+  }
+
+  if(calendarMonth > 11){
+    calendarMonth = 0;
+    calendarYear++;
+  }
+
+  selectedDate = `${calendarYear}-${String(calendarMonth + 1).padStart(2,'0')}-01`;
+  renderAll();
+}
+
+function selectDate(dateString){
+  selectedDate = dateString;
+  renderAll();
+}
+
+function renderCalendar(){
+  const calendar = getEl('calendar');
+  const firstDay = new Date(calendarYear,calendarMonth,1);
+  const lastDay = new Date(calendarYear,calendarMonth + 1,0);
+  const weekNames = ['日','月','火','水','木','金','土'];
+
+  calendar.innerHTML = weekNames.map(day => `<div class="week-name">${day}</div>`).join('');
+
+  for(let i = 0; i < firstDay.getDay(); i++){
+    calendar.insertAdjacentHTML('beforeend','<div></div>');
+  }
+
+  for(let day = 1; day <= lastDay.getDate(); day++){
+    const date = new Date(calendarYear,calendarMonth,day);
+    const dateString = toDateString(date);
+    const items = expandTransactionsForDate(date);
+    const budgetTotal = sumSigned(items.filter(item => item.mode === 'budget'));
+    const actualTotal = sumSigned(items.filter(item => item.mode === 'actual'));
+
+    calendar.insertAdjacentHTML('beforeend',`
+      <div class="calendar-day ${dateString === today ? 'today' : ''} ${dateString === selectedDate ? 'selected' : ''}" onclick="selectDate('${dateString}')">
+        <div class="calendar-date">${day}</div>
+        <div class="day-total">
+          <div class="day-total-row">
+            <span>予算</span>
+            <span class="${budgetTotal < 0 ? 'budget-text' : 'plus'}">${yen(budgetTotal)}</span>
+          </div>
+          <div class="day-total-row">
+            <span>実績</span>
+            <span class="${actualTotal < 0 ? 'minus' : 'actual-text'}">${yen(actualTotal)}</span>
+          </div>
+        </div>
+        ${items.slice(0,2).map(renderCalendarItem).join('')}
+      </div>
+    `);
+  }
+}
+
+function renderCalendarItem(item){
+  const amount = signedAmount(item);
+  const isActual = item.mode === 'actual';
+  const isIncome = item.type === 'income';
+
+  return `
+    <div class="entry-chip ${isActual ? 'actual' : ''} ${isIncome ? 'income' : ''}">
+      <div class="entry-title">${item.title}</div>
+      <div>
+        <strong class="${amount < 0 ? 'minus' : 'plus'}">${yen(amount)}</strong>
+      </div>
+      <div class="entry-meta">${modeLabel(item.mode)} / ${item.category}</div>
+    </div>
+  `;
+}
+
+function renderSelectedDateDetails(dateString){
+  const items = expandTransactionsForDate(parseDate(dateString));
+  const budgets = items.filter(item => item.mode === 'budget');
+  const actuals = items.filter(item => item.mode === 'actual');
+  const label = `${parseDate(dateString).getMonth() + 1}/${parseDate(dateString).getDate()}`;
+
+  getEl('selectedDatePanel').innerHTML = `
+    <div class="detail-header">
+      <h2 class="section-title">${label} の詳細</h2>
+      <span class="tag">${dateString}</span>
+    </div>
+    <div class="detail-group">
+      <h3>その日の予算</h3>
+      ${budgets.length ? budgets.map(renderDetailItem).join('') : '<div class="empty">予算はありません</div>'}
+    </div>
+    <div class="detail-group">
+      <h3>その日の実績</h3>
+      ${actuals.length ? actuals.map(renderDetailItem).join('') : '<div class="empty">実績はありません</div>'}
+    </div>
+  `;
+}
+
+function renderDetailItem(item){
+  const amount = signedAmount(item);
+  return `
+    <div class="detail-item ${item.mode}">
+      <div class="history-head">
+        <span>${modeLabel(item.mode)} ${typeLabel(item.type)}</span>
+        <span>${repeatLabel(item)}</span>
+      </div>
+      <div class="history-title">${item.title}</div>
+      <div class="tag-row">
+        <span class="tag">${item.category}</span>
+        <span class="tag">${item.occurrenceDate}</span>
+      </div>
+      <div class="history-amount ${amount < 0 ? 'minus' : 'plus'}">${yen(amount)}</div>
+      <div class="detail-actions">
+        ${
+          item.mode === 'budget'
+          ? `<button class="mini-button btn-actual" onclick="convertBudgetToActual('${item.id}','${item.occurrenceDate}')">実績化</button>`
+          : ''
+        }
+        <button class="mini-button btn-light" onclick="openEditModal('${item.id}')">編集</button>
+        <button class="mini-button btn-delete" onclick="deleteTransactionById('${item.id}')">削除</button>
+      </div>
+    </div>
+  `;
+}
+
+// ===== 履歴 =============================================================
+function renderHistory(){
+  const monthItems = expandTransactionsForMonth(calendarYear,calendarMonth)
+    .sort((a,b) => b.occurrenceDate.localeCompare(a.occurrenceDate) || b.createdAt - a.createdAt);
+
+  getEl('historyList').innerHTML = monthItems.length
+    ? monthItems.map(item => {
+      const amount = signedAmount(item);
+      return `
+        <div class="history-card">
+          <div class="history-head">
+            <span>${item.occurrenceDate}</span>
+            <span>${modeLabel(item.mode)} ${typeLabel(item.type)}</span>
+          </div>
+          <div class="history-title">${item.title}</div>
+          <div class="tag-row">
+            <span class="tag">${item.category}</span>
+            <span class="tag">${repeatLabel(item)}</span>
+          </div>
+          <div class="history-amount ${amount < 0 ? 'minus' : 'plus'}">${yen(amount)}</div>
+          <div class="detail-actions">
+            <button class="mini-button btn-light" onclick="openEditModal('${item.id}')">編集</button>
+            <button class="mini-button btn-delete" onclick="deleteTransactionById('${item.id}')">削除</button>
+          </div>
+        </div>
+      `;
+    }).join('')
+    : '<div class="empty">この月の家計データはまだありません</div>';
+}
+
+// ===== 日記 =============================================================
+function selectMood(button,moodValue){
+  getEl('mood').value = moodValue;
+  document.querySelectorAll('#moodSelect button').forEach(btn => btn.classList.remove('active'));
+  button.classList.add('active');
+}
+
+function saveDiary(){
+  const text = getEl('diaryInput').value.trim();
+  if(!text) return;
+
+  diaries.unshift({
+    id:makeId(),
+    date:today,
+    mood:getEl('mood').value || '😐',
+    text,
+    createdAt:Date.now()
+  });
+
+  getEl('diaryInput').value = '';
+  getEl('mood').value = '';
+  document.querySelectorAll('#moodSelect button').forEach(btn => btn.classList.remove('active'));
+  closeAllForms();
+  saveData();
+  renderDiaries();
+}
+
+function deleteDiary(index){
+  diaries.splice(index,1);
+  saveData();
+  renderDiaries();
+}
+
+function renderDiaries(){
+  getEl('diaryList').innerHTML = diaries.length
+    ? diaries.map((diary,index) => `
+      <div class="diary-card">
+        <div class="history-head">
+          <span>${diary.date}</span>
+          <span>${diary.mood}</span>
+        </div>
+        <div>${diary.text}</div>
+        <button class="mini-button btn-delete" onclick="deleteDiary(${index})">削除</button>
+      </div>
+    `).join('')
+    : '<div class="empty">まだ日記がありません</div>';
+}
+
+// ===== 描画入口 =========================================================
+function renderAll(){
+  renderSummary();
+  renderCalendar();
+  renderSelectedDateDetails(selectedDate);
+  renderHistory();
+  renderDiaries();
+}
+
+loadData();
+setup();
+</script>
+</body>
+</html>
