@@ -23,9 +23,18 @@
   --soft-budget:#fff7ed;
   --soft-actual:#ecfdf5;
   --soft-gray:#f8fafc;
+  --shadow:0 10px 28px rgba(31,41,55,.10);
+  --focus-ring:0 0 0 3px rgba(37,99,235,.14);
 }
 
-*{box-sizing:border-box;}
+*,
+*::before,
+*::after{box-sizing:border-box;}
+
+html{
+  width:100%;
+  overflow-x:hidden;
+}
 
 body{
   margin:0;
@@ -33,27 +42,34 @@ body{
   background:var(--bg);
   color:var(--text);
   font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  overflow-x:hidden;
+  transition:background-color .25s ease,color .25s ease;
 }
 
 .app{
+  width:100%;
   max-width:1320px;
   margin:0 auto;
   display:grid;
-  grid-template-columns:minmax(320px,430px) 1fr;
+  grid-template-columns:minmax(0,430px) minmax(0,1fr);
   gap:18px;
   align-items:start;
+  min-width:0;
 }
 
 .panel{
+  min-width:0;
   background:var(--panel);
   border-radius:20px;
   padding:18px;
-  box-shadow:0 10px 28px rgba(31,41,55,.10);
+  box-shadow:var(--shadow);
+  transition:background-color .25s ease,border-color .25s ease,box-shadow .25s ease;
 }
 
 .right-panel{
   display:grid;
   gap:18px;
+  min-width:0;
 }
 
 .calendar-panel{
@@ -82,6 +98,7 @@ h1,h2,h3{line-height:1.25;}
 }
 
 button{
+  max-width:100%;
   min-height:44px;
   border:0;
   border-radius:13px;
@@ -89,6 +106,9 @@ button{
   font-weight:850;
   cursor:pointer;
   touch-action:manipulation;
+  white-space:normal;
+  line-height:1.2;
+  transition:background-color .25s ease,color .25s ease,border-color .25s ease,box-shadow .25s ease;
 }
 
 button:disabled{
@@ -98,6 +118,7 @@ button:disabled{
 
 .full-button{
   width:100%;
+  min-width:0;
   margin-top:7px;
   padding:12px;
   font-size:15px;
@@ -105,6 +126,7 @@ button:disabled{
 
 .mini-button{
   width:auto;
+  max-width:100%;
   min-height:34px;
   padding:7px 10px;
   font-size:12px;
@@ -124,12 +146,15 @@ button:disabled{
 
 input,select,textarea{
   width:100%;
+  max-width:100%;
+  min-width:0;
   min-height:44px;
   margin-bottom:10px;
   padding:12px;
   border:2px solid var(--line);
   border-radius:13px;
-  background:#fff;
+  background:var(--panel);
+  color:var(--text);
   font-size:16px;
 }
 
@@ -180,8 +205,58 @@ textarea{
 
 .form-grid{
   display:grid;
-  grid-template-columns:1fr 1fr;
+  grid-template-columns:repeat(2,minmax(0,1fr));
   gap:10px;
+  min-width:0;
+}
+
+.form-grid > *,
+.summary-grid > *,
+.month-nav > *{
+  min-width:0;
+}
+
+.theme-box{
+  margin:0 0 16px;
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--soft-gray);
+}
+
+.theme-box label{
+  margin-top:0;
+}
+
+.theme-select{
+  margin-bottom:0;
+}
+
+.weekday-grid{
+  display:grid;
+  grid-template-columns:repeat(7,minmax(0,1fr));
+  gap:6px;
+  margin-bottom:10px;
+}
+
+.weekday-grid label{
+  display:flex;
+  align-items:center;
+  justify-content:center;
+  min-height:42px;
+  margin:0;
+  padding:8px 4px;
+  border:1px solid var(--line);
+  border-radius:12px;
+  background:var(--panel);
+  color:var(--text);
+  font-size:13px;
+}
+
+.weekday-grid input{
+  width:auto;
+  min-height:0;
+  margin:0 4px 0 0;
 }
 
 .repeat-fields{
@@ -194,7 +269,7 @@ textarea{
 
 .month-nav{
   display:grid;
-  grid-template-columns:48px 1fr 48px;
+  grid-template-columns:minmax(44px,48px) minmax(0,1fr) minmax(44px,48px);
   align-items:center;
   gap:10px;
   margin-bottom:12px;
@@ -204,6 +279,7 @@ textarea{
   margin:0;
   text-align:center;
   font-size:22px;
+  overflow-wrap:anywhere;
 }
 
 .summary{
@@ -213,6 +289,7 @@ textarea{
 }
 
 .summary-main{
+  min-width:0;
   padding:14px;
   border-radius:16px;
   background:#f1f5f9;
@@ -225,8 +302,9 @@ textarea{
 
 .summary-grid{
   display:grid;
-  grid-template-columns:repeat(4,1fr);
+  grid-template-columns:repeat(4,minmax(0,1fr));
   gap:8px;
+  min-width:0;
 }
 
 .summary-card{
@@ -281,6 +359,7 @@ textarea{
 }
 
 .calendar-day{
+  min-width:0;
   min-height:138px;
   padding:7px;
   border:1px solid #e5e7eb;
@@ -296,8 +375,8 @@ textarea{
 
 .calendar-day.selected{
   border:3px solid var(--income);
-  background:#eff6ff;
-  box-shadow:0 0 0 3px rgba(37,99,235,.14);
+  background:var(--soft-income);
+  box-shadow:var(--focus-ring);
 }
 
 .calendar-date{
@@ -316,15 +395,26 @@ textarea{
   display:flex;
   justify-content:space-between;
   gap:4px;
+  min-width:0;
+}
+
+.day-total-row span{
+  min-width:0;
+  overflow-wrap:anywhere;
 }
 
 .entry-chip{
+  display:grid;
+  gap:2px;
+  min-width:0;
+  max-width:100%;
   margin-top:5px;
   padding:6px;
   border-radius:11px;
   font-size:12px;
   border:1px solid #fed7aa;
   background:rgba(255,247,237,.85);
+  overflow:hidden;
 }
 
 .entry-chip.actual{
@@ -345,6 +435,7 @@ textarea{
 .entry-meta{
   color:var(--muted);
   font-size:11px;
+  overflow-wrap:anywhere;
 }
 
 .entry-actions,.detail-actions,.modal-actions{
@@ -352,6 +443,14 @@ textarea{
   flex-wrap:wrap;
   gap:6px;
   margin-top:7px;
+  min-width:0;
+}
+
+.entry-actions > *,
+.detail-actions > *,
+.modal-actions > *{
+  flex:1 1 auto;
+  min-width:96px;
 }
 
 .detail-panel{
@@ -406,6 +505,7 @@ textarea{
 
 .history-head{
   display:flex;
+  flex-wrap:wrap;
   justify-content:space-between;
   gap:10px;
   color:var(--muted);
@@ -487,6 +587,7 @@ textarea{
 
 .modal{
   width:min(720px,90vw);
+  min-width:0;
   max-height:88vh;
   overflow:auto;
   padding:18px;
@@ -513,41 +614,74 @@ textarea{
   body{padding:8px;}
 
   .panel{
-    padding:14px;
+    padding:clamp(10px,3vw,14px);
     border-radius:16px;
   }
 
   .form-grid,.summary-grid{
-    grid-template-columns:1fr 1fr;
+    grid-template-columns:1fr;
+  }
+
+  .month-nav{
+    grid-template-columns:44px minmax(0,1fr) 44px;
+    gap:6px;
   }
 
   .calendar-day{
-    min-height:118px;
-    padding:5px;
-    font-size:11px;
+    min-height:104px;
+    padding:4px;
+    font-size:clamp(10px,2.5vw,11px);
+    border-radius:10px;
   }
 
   .day-total,.entry-chip{
-    font-size:10px;
+    font-size:clamp(9px,2.4vw,10px);
   }
 
   .entry-meta{
-    font-size:10px;
+    font-size:clamp(9px,2.3vw,10px);
   }
 
   .mini-button{
     min-height:34px;
     padding:7px 9px;
+    font-size:12px;
   }
 
   .month-nav h2{
-    font-size:18px;
+    font-size:clamp(16px,4vw,18px);
+  }
+
+  .weekday-grid{
+    grid-template-columns:repeat(4,minmax(0,1fr));
+  }
+
+  #calendar{
+    gap:4px;
   }
 }
 
 @media(max-width:520px){
   .summary-grid,.form-grid{
     grid-template-columns:1fr;
+  }
+
+  .app{
+    gap:10px;
+  }
+
+  .calendar-day{
+    min-height:92px;
+  }
+
+  .entry-chip{
+    padding:4px;
+  }
+
+  .entry-actions > *,
+  .detail-actions > *,
+  .modal-actions > *{
+    min-width:100%;
   }
 }
 </style>
@@ -557,6 +691,17 @@ textarea{
 <div class="app">
   <section class="panel">
     <h1 class="panel-title">家計入力</h1>
+
+    <div class="theme-box">
+      <label for="themeSelect">テーマカラー</label>
+      <select id="themeSelect" class="theme-select" onchange="changeTheme(this.value)">
+        <option value="blue">ブルー</option>
+        <option value="green">グリーン</option>
+        <option value="purple">パープル</option>
+        <option value="orange">オレンジ</option>
+        <option value="dark">ダーク</option>
+      </select>
+    </div>
 
     <div class="menu-title">予算メニュー</div>
     <button class="full-button btn-budget" onclick="openForm('budgetIncomeForm')">予算収入</button>
@@ -581,6 +726,9 @@ textarea{
 
     <button class="full-button btn-income" onclick="openForm('fixedDailyForm')">毎日自動発生</button>
     <form id="fixedDailyForm" class="entry-form budget" onsubmit="saveFormTransaction(event,'fixedDailyForm','budget','expense','daily')"></form>
+
+    <button class="full-button btn-income" onclick="openForm('fixedWeeklyForm')">毎週自動発生</button>
+    <form id="fixedWeeklyForm" class="entry-form budget" onsubmit="saveFormTransaction(event,'fixedWeeklyForm','budget','expense','weekly')"></form>
 
     <div class="menu-title">日記メニュー</div>
     <button class="full-button btn-diary" onclick="openForm('diaryForm')">日記を書く</button>
@@ -666,9 +814,15 @@ textarea{
       <select id="editRepeat" onchange="syncEditRepeatFields()">
         <option value="none">この日だけ</option>
         <option value="daily">毎日</option>
+        <option value="weekly">毎週</option>
         <option value="monthly">毎月</option>
         <option value="yearly">毎年</option>
       </select>
+
+      <div id="editWeeklyFields" class="repeat-fields">
+        <label>毎週の曜日</label>
+        <div id="editWeeklyDays" class="weekday-grid"></div>
+      </div>
 
       <div id="editMonthlyFields" class="repeat-fields">
         <label for="editMonthlyDay">毎月何日</label>
@@ -708,10 +862,109 @@ textarea{
 
 const STORAGE = {
   transactions: 'transactions',
-  diaries: 'diaries'
+  diaries: 'diaries',
+  theme: 'kakeiboTheme'
 };
 
 const CATEGORIES = ['食費','日用品','交通費','娯楽','固定費','給与','その他'];
+const WEEKDAYS = ['日','月','火','水','木','金','土'];
+const THEMES = {
+  blue:{
+    '--bg':'#f3f6f8',
+    '--panel':'#ffffff',
+    '--text':'#1f2937',
+    '--muted':'#6b7280',
+    '--line':'#d8dee6',
+    '--income':'#2563eb',
+    '--expense':'#dc2626',
+    '--budget':'#f59e0b',
+    '--actual':'#0f766e',
+    '--diary':'#16a34a',
+    '--dark':'#263241',
+    '--soft-income':'#eff6ff',
+    '--soft-expense':'#fff1f2',
+    '--soft-budget':'#fff7ed',
+    '--soft-actual':'#ecfdf5',
+    '--soft-gray':'#f8fafc',
+    '--focus-ring':'0 0 0 3px rgba(37,99,235,.14)'
+  },
+  green:{
+    '--bg':'#f3f8f4',
+    '--panel':'#ffffff',
+    '--text':'#1f2937',
+    '--muted':'#66736c',
+    '--line':'#d4e3d9',
+    '--income':'#15803d',
+    '--expense':'#dc2626',
+    '--budget':'#ca8a04',
+    '--actual':'#047857',
+    '--diary':'#16a34a',
+    '--dark':'#1f3a2e',
+    '--soft-income':'#f0fdf4',
+    '--soft-expense':'#fff1f2',
+    '--soft-budget':'#fefce8',
+    '--soft-actual':'#ecfdf5',
+    '--soft-gray':'#f7fbf8',
+    '--focus-ring':'0 0 0 3px rgba(21,128,61,.15)'
+  },
+  purple:{
+    '--bg':'#f7f5fb',
+    '--panel':'#ffffff',
+    '--text':'#28243a',
+    '--muted':'#746b82',
+    '--line':'#ded7ea',
+    '--income':'#7c3aed',
+    '--expense':'#dc2626',
+    '--budget':'#d97706',
+    '--actual':'#6d28d9',
+    '--diary':'#16a34a',
+    '--dark':'#34294f',
+    '--soft-income':'#f5f3ff',
+    '--soft-expense':'#fff1f2',
+    '--soft-budget':'#fff7ed',
+    '--soft-actual':'#f5f3ff',
+    '--soft-gray':'#faf7ff',
+    '--focus-ring':'0 0 0 3px rgba(124,58,237,.15)'
+  },
+  orange:{
+    '--bg':'#fbf7f2',
+    '--panel':'#ffffff',
+    '--text':'#2f261d',
+    '--muted':'#7b6a58',
+    '--line':'#ead9c5',
+    '--income':'#2563eb',
+    '--expense':'#dc2626',
+    '--budget':'#ea580c',
+    '--actual':'#0f766e',
+    '--diary':'#16a34a',
+    '--dark':'#3b2c22',
+    '--soft-income':'#eff6ff',
+    '--soft-expense':'#fff1f2',
+    '--soft-budget':'#fff7ed',
+    '--soft-actual':'#ecfdf5',
+    '--soft-gray':'#fffaf4',
+    '--focus-ring':'0 0 0 3px rgba(234,88,12,.15)'
+  },
+  dark:{
+    '--bg':'#111827',
+    '--panel':'#1f2937',
+    '--text':'#f9fafb',
+    '--muted':'#cbd5e1',
+    '--line':'#475569',
+    '--income':'#60a5fa',
+    '--expense':'#fb7185',
+    '--budget':'#fbbf24',
+    '--actual':'#34d399',
+    '--diary':'#4ade80',
+    '--dark':'#0f172a',
+    '--soft-income':'#1e3a5f',
+    '--soft-expense':'#4a1d2a',
+    '--soft-budget':'#433414',
+    '--soft-actual':'#12382f',
+    '--soft-gray':'#273449',
+    '--focus-ring':'0 0 0 3px rgba(96,165,250,.20)'
+  }
+};
 const today = new Date().toISOString().split('T')[0];
 
 let calendarYear = new Date().getFullYear();
@@ -744,9 +997,23 @@ function signedAmount(tx){
 
 function repeatLabel(tx){
   if(tx.repeat === 'daily') return '毎日';
+  if(tx.repeat === 'weekly'){
+    const days = normalizeWeeklyDays(tx.weeklyDays,parseDate(tx.date).getDay())
+      .map(day => WEEKDAYS[day])
+      .join('・');
+    return `毎週 ${days}`;
+  }
   if(tx.repeat === 'monthly') return `毎月${tx.monthlyDay}日`;
   if(tx.repeat === 'yearly') return `毎年${tx.yearlyMonth}月${tx.yearlyDay}日`;
   return 'この日だけ';
+}
+
+function normalizeWeeklyDays(days,fallbackDay){
+  const normalized = Array.isArray(days)
+    ? days.map(Number).filter(day => day >= 0 && day <= 6)
+    : [];
+  const unique = [...new Set(normalized)];
+  return unique.length ? unique.sort((a,b) => a - b) : [fallbackDay];
 }
 
 function modeLabel(mode){
@@ -806,6 +1073,7 @@ function loadData(){
       amount:Math.abs(Number(schedule.amount) || 0),
       date:schedule.startDate || schedule.date || today,
       repeat:schedule.repeat || schedule.repeatType || 'none',
+      weeklyDays:schedule.weeklyDays,
       monthlyDay:schedule.monthlyDay,
       yearlyMonth:schedule.yearlyMonth,
       yearlyDay:schedule.yearlyDay,
@@ -830,6 +1098,9 @@ function normalizeTransaction(tx){
     amount:Math.abs(Number(tx.amount) || 0),
     date,
     repeat,
+    weeklyDays:repeat === 'weekly'
+      ? normalizeWeeklyDays(tx.weeklyDays,parsed.getDay())
+      : [],
     monthlyDay:repeat === 'monthly' ? Number(tx.monthlyDay || parsed.getDate()) : null,
     yearlyMonth:repeat === 'yearly' ? Number(tx.yearlyMonth || parsed.getMonth() + 1) : null,
     yearlyDay:repeat === 'yearly' ? Number(tx.yearlyDay || parsed.getDate()) : null,
@@ -842,11 +1113,34 @@ function saveData(){
   localStorage.setItem(STORAGE.diaries,JSON.stringify(diaries));
 }
 
+// ===== テーマ管理 =======================================================
+// CSS変数だけを差し替えるので、HTML構造を壊さず色だけ変更できます。
+function applyTheme(themeName){
+  const theme = THEMES[themeName] || THEMES.blue;
+  Object.entries(theme).forEach(([key,value]) => {
+    document.documentElement.style.setProperty(key,value);
+  });
+  if(getEl('themeSelect')){
+    getEl('themeSelect').value = THEMES[themeName] ? themeName : 'blue';
+  }
+}
+
+function changeTheme(themeName){
+  localStorage.setItem(STORAGE.theme,themeName);
+  applyTheme(themeName);
+}
+
+function loadTheme(){
+  applyTheme(localStorage.getItem(STORAGE.theme) || 'blue');
+}
+
 // ===== フォーム管理 =====================================================
 function setup(){
+  loadTheme();
   buildTransactionForms();
   fillCategoryOptions('editCategory');
   fillYearOptions('editYearlyMonth');
+  renderWeeklyCheckboxes('editWeeklyDays','editWeeklyDay');
   renderAll();
 }
 
@@ -858,13 +1152,15 @@ function buildTransactionForms(){
     ['actualExpenseForm','実績支出','actual','expense','none'],
     ['fixedMonthlyForm','毎月自動発生','budget','expense','monthly'],
     ['fixedYearlyForm','毎年自動発生','budget','expense','yearly'],
-    ['fixedDailyForm','毎日自動発生','budget','expense','daily']
+    ['fixedDailyForm','毎日自動発生','budget','expense','daily'],
+    ['fixedWeeklyForm','毎週自動発生','budget','expense','weekly']
   ];
 
   configs.forEach(([id,title,mode,type,repeat]) => {
     getEl(id).innerHTML = transactionFormHtml(id,title,mode,type,repeat);
     fillCategoryOptions(`${id}_category`,type === 'income' ? '給与' : '固定費');
     fillYearOptions(`${id}_yearlyMonth`);
+    renderWeeklyCheckboxes(`${id}_weeklyDays`,`${id}_weeklyDay`);
     getEl(`${id}_date`).value = selectedDate;
     getEl(`${id}_repeat`).value = repeat;
     syncFormRepeatFields(id);
@@ -903,9 +1199,14 @@ function transactionFormHtml(id,title,mode,type,repeat){
     <select id="${id}_repeat" onchange="syncFormRepeatFields('${id}')">
       <option value="none">この日だけ</option>
       <option value="daily">毎日</option>
+      <option value="weekly">毎週</option>
       <option value="monthly">毎月</option>
       <option value="yearly">毎年</option>
     </select>
+    <div id="${id}_weeklyWrap" class="repeat-fields">
+      <label>毎週の曜日</label>
+      <div id="${id}_weeklyDays" class="weekday-grid"></div>
+    </div>
     <div id="${id}_monthlyWrap" class="repeat-fields">
       <label for="${id}_monthlyDay">毎月何日</label>
       <input type="number" min="1" max="31" id="${id}_monthlyDay" placeholder="25">
@@ -939,6 +1240,22 @@ function fillYearOptions(id){
   }).join('');
 }
 
+function renderWeeklyCheckboxes(containerId,name,selectedDays=[]){
+  const selected = new Set(selectedDays.map(Number));
+  getEl(containerId).innerHTML = WEEKDAYS.map((label,index) => `
+    <label>
+      <input type="checkbox" name="${name}" value="${index}" ${selected.has(index) ? 'checked' : ''}>
+      ${label}
+    </label>
+  `).join('');
+}
+
+function getSelectedWeeklyDays(name,fallbackDay){
+  const checked = [...document.querySelectorAll(`input[name="${name}"]:checked`)]
+    .map(input => Number(input.value));
+  return normalizeWeeklyDays(checked,fallbackDay);
+}
+
 function openForm(id){
   document.querySelectorAll('.entry-form').forEach(form => {
     form.classList.toggle('show',form.id === id && !form.classList.contains('show'));
@@ -953,8 +1270,17 @@ function openForm(id){
 function syncFormRepeatFields(id){
   const repeat = getEl(`${id}_repeat`).value;
   const date = parseDate(getEl(`${id}_date`).value || selectedDate || today);
+  getEl(`${id}_weeklyWrap`).classList.toggle('show',repeat === 'weekly');
   getEl(`${id}_monthlyWrap`).classList.toggle('show',repeat === 'monthly');
   getEl(`${id}_yearlyWrap`).classList.toggle('show',repeat === 'yearly');
+
+  if(repeat === 'weekly'){
+    const checked = document.querySelectorAll(`input[name="${id}_weeklyDay"]:checked`);
+    if(!checked.length){
+      const fallback = getEl(`${id}_weeklyDays`).querySelector(`input[value="${date.getDay()}"]`);
+      if(fallback) fallback.checked = true;
+    }
+  }
 
   if(!getEl(`${id}_monthlyDay`).value){
     getEl(`${id}_monthlyDay`).value = date.getDate();
@@ -983,6 +1309,7 @@ function saveFormTransaction(event,formId,mode,type,defaultRepeat){
     amount:Number(getEl(`${formId}_amount`).value),
     date,
     repeat,
+    weeklyDays:repeat === 'weekly' ? getSelectedWeeklyDays(`${formId}_weeklyDay`,parsed.getDay()) : [],
     monthlyDay:repeat === 'monthly' ? Number(getEl(`${formId}_monthlyDay`).value || parsed.getDate()) : null,
     yearlyMonth:repeat === 'yearly' ? Number(getEl(`${formId}_yearlyMonth`).value || parsed.getMonth() + 1) : null,
     yearlyDay:repeat === 'yearly' ? Number(getEl(`${formId}_yearlyDay`).value || parsed.getDate()) : null,
@@ -1016,6 +1343,10 @@ function isTransactionMatchDate(tx,date){
 
   if(tx.repeat === 'daily'){
     return true;
+  }
+
+  if(tx.repeat === 'weekly'){
+    return normalizeWeeklyDays(tx.weeklyDays,start.getDay()).includes(date.getDay());
   }
 
   if(tx.repeat === 'monthly'){
@@ -1113,6 +1444,7 @@ function openEditModal(id){
   getEl('editTitle').value = tx.title;
   fillCategoryOptions('editCategory',tx.category);
   getEl('editRepeat').value = tx.repeat;
+  renderWeeklyCheckboxes('editWeeklyDays','editWeeklyDay',tx.weeklyDays || []);
   getEl('editMonthlyDay').value = tx.monthlyDay || parseDate(tx.date).getDate();
   getEl('editYearlyMonth').value = tx.yearlyMonth || parseDate(tx.date).getMonth() + 1;
   getEl('editYearlyDay').value = tx.yearlyDay || parseDate(tx.date).getDate();
@@ -1123,8 +1455,17 @@ function openEditModal(id){
 function syncEditRepeatFields(){
   const repeat = getEl('editRepeat').value;
   const date = parseDate(getEl('editDate').value || today);
+  getEl('editWeeklyFields').classList.toggle('show',repeat === 'weekly');
   getEl('editMonthlyFields').classList.toggle('show',repeat === 'monthly');
   getEl('editYearlyFields').classList.toggle('show',repeat === 'yearly');
+
+  if(repeat === 'weekly'){
+    const checked = document.querySelectorAll('input[name="editWeeklyDay"]:checked');
+    if(!checked.length){
+      const fallback = getEl('editWeeklyDays').querySelector(`input[value="${date.getDay()}"]`);
+      if(fallback) fallback.checked = true;
+    }
+  }
 
   if(!getEl('editMonthlyDay').value){
     getEl('editMonthlyDay').value = date.getDate();
@@ -1149,6 +1490,7 @@ function saveEditTransaction(event){
     title:getEl('editTitle').value.trim(),
     category:getEl('editCategory').value,
     repeat,
+    weeklyDays:repeat === 'weekly' ? getSelectedWeeklyDays('editWeeklyDay',parsed.getDay()) : [],
     monthlyDay:repeat === 'monthly' ? Number(getEl('editMonthlyDay').value || parsed.getDate()) : null,
     yearlyMonth:repeat === 'yearly' ? Number(getEl('editYearlyMonth').value || parsed.getMonth() + 1) : null,
     yearlyDay:repeat === 'yearly' ? Number(getEl('editYearlyDay').value || parsed.getDate()) : null
