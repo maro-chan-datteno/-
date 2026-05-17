@@ -17,13 +17,13 @@
   --budget:#d97706;
   --actual:#0f766e;
   --diary:#16a34a;
-  --wish:#7c3aed;
+  --plan:#7c3aed;
   --dark:#374151;
   --soft-income:#f3f7ff;
   --soft-expense:#fff5f5;
   --soft-budget:#fff8ed;
   --soft-actual:#f0faf7;
-  --soft-wish:#f6f2ff;
+  --soft-plan:#f6f2ff;
   --soft-gray:#f8f9fb;
   --shadow:0 14px 36px rgba(31,41,55,.09);
   --focus-ring:0 0 0 3px rgba(37,99,235,.14);
@@ -111,9 +111,41 @@ h1,h2,h3{line-height:1.25;}
 
 .menu-title{
   margin:22px 0 8px;
-  color:var(--muted);
-  font-size:14px;
+  padding:13px 14px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--soft-gray);
+  color:var(--text);
+  font-size:15px;
   font-weight:900;
+  cursor:pointer;
+  box-shadow:0 6px 18px rgba(31,41,55,.05);
+}
+
+.menu-title::after{
+  content:"開く";
+  float:right;
+  color:var(--muted);
+  font-size:12px;
+}
+
+.menu-title.open::after{
+  content:"閉じる";
+}
+
+.menu-title.budget-title{background:var(--soft-budget);}
+.menu-title.actual-title{background:var(--soft-actual);}
+.menu-title.fixed-title{background:#eef2f7;}
+.menu-title.diary-title{background:#effaf3;}
+.menu-title.plan-title{background:var(--soft-plan);}
+
+.menu-body{
+  display:none;
+  padding:4px 0 10px;
+}
+
+.menu-body.open{
+  display:block;
 }
 
 .section-title{
@@ -161,7 +193,7 @@ button:disabled{
 .btn-budget{background:var(--budget);}
 .btn-actual{background:var(--actual);}
 .btn-diary{background:var(--diary);}
-.btn-wish{background:var(--wish);}
+.btn-plan{background:var(--plan);}
 .btn-delete{background:#4b5563;}
 .btn-month{background:var(--dark);}
 .btn-light{
@@ -228,9 +260,9 @@ textarea{
   background:#f0fdf4;
 }
 
-.entry-form.wish.show{
-  border-color:var(--wish);
-  background:var(--soft-wish);
+.entry-form.plan.show{
+  border-color:var(--plan);
+  background:var(--soft-plan);
 }
 
 .form-grid{
@@ -433,6 +465,32 @@ textarea{
   overflow-wrap:anywhere;
 }
 
+.day-dots{
+  display:grid;
+  gap:3px;
+  margin-top:5px;
+  color:var(--muted);
+  font-size:10px;
+}
+
+.dot-line{
+  display:flex;
+  align-items:center;
+  gap:3px;
+  min-width:0;
+}
+
+.dot{
+  width:7px;
+  height:7px;
+  border-radius:50%;
+  flex:0 0 auto;
+}
+
+.dot.budget{background:var(--budget);}
+.dot.actual{background:var(--actual);}
+.dot.fixed{background:var(--income);}
+
 .entry-chip{
   display:grid;
   gap:2px;
@@ -573,13 +631,41 @@ textarea{
   background:#f7fff8;
 }
 
-.wish-grid{
+.plan-grid{
   display:grid;
   grid-template-columns:repeat(2,minmax(0,1fr));
   gap:10px;
 }
 
-.wish-card{
+.plan-summary{
+  grid-column:1/-1;
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:8px;
+  margin-bottom:4px;
+}
+
+.plan-summary div{
+  padding:12px;
+  border:1px solid var(--line);
+  border-radius:16px;
+  background:var(--soft-gray);
+}
+
+.plan-summary span{
+  display:block;
+  color:var(--muted);
+  font-size:12px;
+  font-weight:800;
+}
+
+.plan-summary strong{
+  display:block;
+  margin-top:4px;
+  font-size:16px;
+}
+
+.plan-card{
   min-width:0;
   padding:14px;
   border:1px solid var(--line);
@@ -588,18 +674,18 @@ textarea{
   box-shadow:0 8px 22px rgba(31,41,55,.07);
 }
 
-.wish-card.done{
+.plan-card.done{
   background:linear-gradient(180deg,var(--soft-actual),var(--panel));
   border-color:rgba(15,118,110,.35);
 }
 
-.wish-card h3{
+.plan-card h3{
   margin:0 0 8px;
   font-size:17px;
   overflow-wrap:anywhere;
 }
 
-.wish-meta{
+.plan-meta{
   color:var(--muted);
   font-size:13px;
   line-height:1.5;
@@ -618,18 +704,25 @@ textarea{
   height:100%;
   width:0%;
   border-radius:999px;
-  background:linear-gradient(90deg,var(--wish),var(--income));
+  background:linear-gradient(90deg,var(--plan),var(--income));
   transition:width .35s ease;
 }
 
-.wish-actions{
+.plan-dots{
+  color:var(--plan);
+  letter-spacing:2px;
+  font-size:17px;
+  line-height:1.3;
+}
+
+.plan-actions{
   display:flex;
   flex-wrap:wrap;
   gap:6px;
   margin-top:10px;
 }
 
-.wish-actions > *{
+.plan-actions > *{
   flex:1 1 auto;
   min-width:86px;
 }
@@ -747,7 +840,11 @@ textarea{
     grid-template-columns:repeat(4,minmax(0,1fr));
   }
 
-  .wish-grid{
+  .plan-grid{
+    grid-template-columns:1fr;
+  }
+
+  .plan-summary{
     grid-template-columns:1fr;
   }
 
@@ -776,7 +873,7 @@ textarea{
   .entry-actions > *,
   .detail-actions > *,
   .modal-actions > *,
-  .wish-actions > *{
+  .plan-actions > *{
     min-width:100%;
   }
 }
@@ -840,19 +937,24 @@ textarea{
       <button class="full-button btn-diary" onclick="saveDiary()" type="button">日記保存</button>
     </div>
 
-    <div class="menu-title">やりたいことメニュー</div>
-    <button class="full-button btn-wish" onclick="openWishForm('buy')">買うもの追加</button>
-    <button class="full-button btn-wish" onclick="openWishForm('goal')">やりたいこと追加</button>
-    <form id="wishForm" class="entry-form wish" onsubmit="saveWish(event)">
-      <input type="hidden" id="wishType" value="buy">
-      <input type="hidden" id="wishEditId">
-      <label for="wishTitle">タイトル</label>
-      <input id="wishTitle" placeholder="Nintendo Switch、北海道旅行など" required>
-      <label for="wishTargetAmount">目標予算</label>
-      <input id="wishTargetAmount" type="number" placeholder="45000" required>
-      <label for="wishMemo">メモ</label>
-      <textarea id="wishMemo" placeholder="買う理由、行きたい時期、準備メモなど"></textarea>
-      <button class="full-button btn-wish" type="submit">保存</button>
+    <div class="menu-title">計画メニュー</div>
+    <button class="full-button btn-plan" onclick="openPlanForm('buy')">計画を追加</button>
+    <form id="planForm" class="entry-form plan" onsubmit="savePlan(event)">
+      <input type="hidden" id="planEditId">
+      <label for="planTitle">タイトル</label>
+      <input id="planTitle" placeholder="Nintendo Switch、北海道旅行など" required>
+      <label for="planType">種類</label>
+      <select id="planType">
+        <option value="buy">買いたいもの</option>
+        <option value="goal">やりたいこと</option>
+      </select>
+      <label for="planTargetAmount">必要金額</label>
+      <input id="planTargetAmount" type="number" placeholder="120000" required>
+      <label for="planCategory">カテゴリ</label>
+      <select id="planCategory"></select>
+      <label for="planMemo">メモ</label>
+      <textarea id="planMemo" placeholder="理由、時期、準備メモなど"></textarea>
+      <button class="full-button btn-plan" type="submit">保存</button>
     </form>
   </section>
 
@@ -870,8 +972,8 @@ textarea{
     <div class="panel detail-panel" id="selectedDatePanel"></div>
 
     <div class="panel">
-      <h2 class="section-title">買うもの / やりたいこと</h2>
-      <div id="wishListView" class="wish-grid"></div>
+      <h2 class="section-title">計画一覧</h2>
+      <div id="planListView" class="plan-grid"></div>
     </div>
 
     <div class="panel">
@@ -926,8 +1028,8 @@ textarea{
       <label for="editCategory">カテゴリ</label>
       <select id="editCategory"></select>
 
-      <label for="editWishId">関連計画</label>
-      <select id="editWishId"></select>
+      <label for="editPlanId">関連計画</label>
+      <select id="editPlanId"></select>
 
       <label for="editRepeat">繰り返し</label>
       <select id="editRepeat" onchange="syncEditRepeatFields()">
@@ -982,11 +1084,11 @@ textarea{
 const STORAGE = {
   transactions: 'transactions',
   diaries: 'diaries',
-  wishList: 'wishList',
+  planList: 'planList',
   theme: 'kakeiboTheme'
 };
 
-const CATEGORIES = ['食費','日用品','交通費','娯楽','固定費','給与','その他'];
+const CATEGORIES = ['食費','日用品','交通費','娯楽','固定費','給与','旅行','学習','美容','健康','その他'];
 const WEEKDAYS = ['日','月','火','水','木','金','土'];
 const THEMES = {
   blue:{
@@ -1000,12 +1102,13 @@ const THEMES = {
     '--budget':'#d97706',
     '--actual':'#0f766e',
     '--diary':'#16a34a',
-    '--wish':'#7c3aed',
+    '--plan':'#7c3aed',
     '--dark':'#263241',
     '--soft-income':'#eff6ff',
     '--soft-expense':'#fff1f2',
     '--soft-budget':'#fff7ed',
     '--soft-actual':'#ecfdf5',
+    '--soft-plan':'#f6f2ff',
     '--soft-gray':'#f8fafc',
     '--focus-ring':'0 0 0 3px rgba(37,99,235,.14)'
   },
@@ -1020,12 +1123,13 @@ const THEMES = {
     '--budget':'#ca8a04',
     '--actual':'#047857',
     '--diary':'#16a34a',
-    '--wish':'#6d7f3f',
+    '--plan':'#6d7f3f',
     '--dark':'#1f3a2e',
     '--soft-income':'#f0fdf4',
     '--soft-expense':'#fff1f2',
     '--soft-budget':'#fefce8',
     '--soft-actual':'#ecfdf5',
+    '--soft-plan':'#f4f3ff',
     '--soft-gray':'#f7fbf8',
     '--focus-ring':'0 0 0 3px rgba(21,128,61,.15)'
   },
@@ -1040,12 +1144,13 @@ const THEMES = {
     '--budget':'#d97706',
     '--actual':'#6d28d9',
     '--diary':'#16a34a',
-    '--wish':'#7c3aed',
+    '--plan':'#7c3aed',
     '--dark':'#34294f',
     '--soft-income':'#f5f3ff',
     '--soft-expense':'#fff1f2',
     '--soft-budget':'#fff7ed',
     '--soft-actual':'#f5f3ff',
+    '--soft-plan':'#f6f2ff',
     '--soft-gray':'#faf7ff',
     '--focus-ring':'0 0 0 3px rgba(124,58,237,.15)'
   },
@@ -1060,12 +1165,13 @@ const THEMES = {
     '--budget':'#ea580c',
     '--actual':'#0f766e',
     '--diary':'#16a34a',
-    '--wish':'#a855f7',
+    '--plan':'#a855f7',
     '--dark':'#3b2c22',
     '--soft-income':'#eff6ff',
     '--soft-expense':'#fff1f2',
     '--soft-budget':'#fff7ed',
     '--soft-actual':'#ecfdf5',
+    '--soft-plan':'#f8f2ff',
     '--soft-gray':'#fffaf4',
     '--focus-ring':'0 0 0 3px rgba(234,88,12,.15)'
   },
@@ -1080,12 +1186,13 @@ const THEMES = {
     '--budget':'#fbbf24',
     '--actual':'#34d399',
     '--diary':'#4ade80',
-    '--wish':'#c084fc',
+    '--plan':'#c084fc',
     '--dark':'#0f172a',
     '--soft-income':'#1e3a5f',
     '--soft-expense':'#4a1d2a',
     '--soft-budget':'#433414',
     '--soft-actual':'#12382f',
+    '--soft-plan':'#31224a',
     '--soft-gray':'#273449',
     '--focus-ring':'0 0 0 3px rgba(96,165,250,.20)'
   }
@@ -1098,7 +1205,7 @@ let selectedDate = today;
 let editingTransactionId = null;
 let transactions = [];
 let diaries = [];
-let wishList = [];
+let planList = [];
 
 const getEl = id => document.getElementById(id);
 const yen = value => `${value.toLocaleString()}円`;
@@ -1169,7 +1276,11 @@ function sumBy(items,mode,type){
 function loadData(){
   const savedTransactions = JSON.parse(localStorage.getItem(STORAGE.transactions)) || null;
   diaries = JSON.parse(localStorage.getItem(STORAGE.diaries)) || [];
-  wishList = (JSON.parse(localStorage.getItem(STORAGE.wishList)) || []).map(normalizeWish);
+  planList = (
+    JSON.parse(localStorage.getItem(STORAGE.planList)) ||
+    JSON.parse(localStorage.getItem('wishList')) ||
+    []
+  ).map(normalizePlan);
 
   if(savedTransactions){
     transactions = savedTransactions.map(normalizeTransaction);
@@ -1231,27 +1342,28 @@ function normalizeTransaction(tx){
     monthlyDay:repeat === 'monthly' ? Number(tx.monthlyDay || parsed.getDate()) : null,
     yearlyMonth:repeat === 'yearly' ? Number(tx.yearlyMonth || parsed.getMonth() + 1) : null,
     yearlyDay:repeat === 'yearly' ? Number(tx.yearlyDay || parsed.getDate()) : null,
-    wishId:tx.wishId || '',
+    planId:tx.planId || tx.wishId || '',
     createdAt:Number(tx.createdAt) || Date.now()
   };
 }
 
-function normalizeWish(wish){
+function normalizePlan(plan){
   return {
-    id:wish.id || makeId(),
-    title:wish.title || '名称なし',
-    type:wish.type === 'goal' ? 'goal' : 'buy',
-    targetAmount:Math.abs(Number(wish.targetAmount) || 0),
-    memo:wish.memo || '',
-    status:wish.status === 'done' ? 'done' : 'planned',
-    createdAt:Number(wish.createdAt) || Date.now()
+    id:plan.id || makeId(),
+    title:plan.title || '名称なし',
+    planType:(plan.planType || plan.type) === 'goal' ? 'goal' : 'buy',
+    targetAmount:Math.abs(Number(plan.targetAmount) || 0),
+    category:plan.category || 'その他',
+    memo:plan.memo || '',
+    status:plan.status === 'done' ? 'done' : 'active',
+    createdAt:Number(plan.createdAt) || Date.now()
   };
 }
 
 function saveData(){
   localStorage.setItem(STORAGE.transactions,JSON.stringify(transactions));
   localStorage.setItem(STORAGE.diaries,JSON.stringify(diaries));
-  localStorage.setItem(STORAGE.wishList,JSON.stringify(wishList));
+  localStorage.setItem(STORAGE.planList,JSON.stringify(planList));
 }
 
 // ===== テーマ管理 =======================================================
@@ -1280,9 +1392,45 @@ function setup(){
   loadTheme();
   buildTransactionForms();
   fillCategoryOptions('editCategory');
+  fillCategoryOptions('planCategory','旅行');
   fillYearOptions('editYearlyMonth');
   renderWeeklyCheckboxes('editWeeklyDays','editWeeklyDay');
+  setupMenus();
   renderAll();
+}
+
+// 左パネルの各メニューを起動時に折りたたみグループ化します。
+// HTMLを増やしすぎず、iPadで必要な入力だけ開ける状態にします。
+function setupMenus(){
+  const titles = [...document.querySelectorAll('.menu-title')];
+  titles.forEach((title,index) => {
+    if(title.dataset.ready) return;
+    title.dataset.ready = 'true';
+    title.classList.add(['budget-title','actual-title','fixed-title','diary-title','plan-title'][index] || '');
+
+    const body = document.createElement('div');
+    body.className = 'menu-body';
+    let node = title.nextElementSibling;
+    while(node && !node.classList.contains('menu-title')){
+      const next = node.nextElementSibling;
+      body.appendChild(node);
+      node = next;
+    }
+    title.after(body);
+    title.addEventListener('click',() => toggleMenuBody(title,body));
+  });
+}
+
+function toggleMenuBody(title,body){
+  document.querySelectorAll('.menu-body').forEach(item => {
+    if(item !== body) item.classList.remove('open');
+  });
+  document.querySelectorAll('.menu-title').forEach(item => {
+    if(item !== title) item.classList.remove('open');
+  });
+  body.classList.toggle('open');
+  title.classList.toggle('open');
+  closeAllForms();
 }
 
 function buildTransactionForms(){
@@ -1302,8 +1450,8 @@ function buildTransactionForms(){
     fillCategoryOptions(`${id}_category`,type === 'income' ? '給与' : '固定費');
     fillYearOptions(`${id}_yearlyMonth`);
     renderWeeklyCheckboxes(`${id}_weeklyDays`,`${id}_weeklyDay`);
-    fillWishOptions(`${id}_wishId`);
-    getEl(`${id}_wishWrap`).style.display = mode === 'budget' ? 'block' : 'none';
+    fillPlanOptions(`${id}_planId`);
+    getEl(`${id}_planWrap`).style.display = mode === 'budget' ? 'block' : 'none';
     getEl(`${id}_date`).value = selectedDate;
     getEl(`${id}_repeat`).value = repeat;
     syncFormRepeatFields(id);
@@ -1338,9 +1486,9 @@ function transactionFormHtml(id,title,mode,type,repeat){
     <input id="${id}_title" placeholder="家賃、給与、食費など" required>
     <label for="${id}_category">カテゴリ</label>
     <select id="${id}_category"></select>
-    <div id="${id}_wishWrap">
-      <label for="${id}_wishId">関連計画</label>
-      <select id="${id}_wishId"></select>
+    <div id="${id}_planWrap">
+      <label for="${id}_planId">関連計画</label>
+      <select id="${id}_planId" onchange="applyPlanToForm('${id}',this.value)"></select>
     </div>
     <label for="${id}_repeat">繰り返し</label>
     <select id="${id}_repeat" onchange="syncFormRepeatFields('${id}')">
@@ -1387,16 +1535,24 @@ function fillYearOptions(id){
   }).join('');
 }
 
-function fillWishOptions(id,selectedId=''){
+function fillPlanOptions(id,selectedId=''){
   const options = [
     '<option value="">関連なし</option>',
-    ...wishList.map(wish => `
-      <option value="${wish.id}" ${wish.id === selectedId ? 'selected' : ''}>
-        ${wish.title}
+    ...planList.map(plan => `
+      <option value="${plan.id}" ${plan.id === selectedId ? 'selected' : ''}>
+        ${plan.title}
       </option>
     `)
   ];
   getEl(id).innerHTML = options.join('');
+}
+
+function applyPlanToForm(formId,planId){
+  const plan = planList.find(item => item.id === planId);
+  if(!plan) return;
+  getEl(`${formId}_title`).value = plan.title;
+  getEl(`${formId}_amount`).value = plan.targetAmount;
+  getEl(`${formId}_category`).value = plan.category || 'その他';
 }
 
 function renderWeeklyCheckboxes(containerId,name,selectedDays=[]){
@@ -1416,6 +1572,15 @@ function getSelectedWeeklyDays(name,fallbackDay){
 }
 
 function openForm(id){
+  const target = getEl(id);
+  const menuBody = target?.closest('.menu-body');
+  if(menuBody && !menuBody.classList.contains('open')){
+    document.querySelectorAll('.menu-body').forEach(body => body.classList.remove('open'));
+    document.querySelectorAll('.menu-title').forEach(title => title.classList.remove('open'));
+    menuBody.classList.add('open');
+    menuBody.previousElementSibling?.classList.add('open');
+  }
+
   document.querySelectorAll('.entry-form').forEach(form => {
     form.classList.toggle('show',form.id === id && !form.classList.contains('show'));
   });
@@ -1468,7 +1633,7 @@ function saveFormTransaction(event,formId,mode,type,defaultRepeat){
     amount:Number(getEl(`${formId}_amount`).value),
     date,
     repeat,
-    wishId:mode === 'budget' ? getEl(`${formId}_wishId`).value : '',
+    planId:mode === 'budget' ? getEl(`${formId}_planId`).value : '',
     weeklyDays:repeat === 'weekly' ? getSelectedWeeklyDays(`${formId}_weeklyDay`,parsed.getDay()) : [],
     monthlyDay:repeat === 'monthly' ? Number(getEl(`${formId}_monthlyDay`).value || parsed.getDate()) : null,
     yearlyMonth:repeat === 'yearly' ? Number(getEl(`${formId}_yearlyMonth`).value || parsed.getMonth() + 1) : null,
@@ -1603,7 +1768,7 @@ function openEditModal(id){
   getEl('editAmount').value = tx.amount;
   getEl('editTitle').value = tx.title;
   fillCategoryOptions('editCategory',tx.category);
-  fillWishOptions('editWishId',tx.wishId || '');
+  fillPlanOptions('editPlanId',tx.planId || '');
   getEl('editRepeat').value = tx.repeat;
   renderWeeklyCheckboxes('editWeeklyDays','editWeeklyDay',tx.weeklyDays || []);
   getEl('editMonthlyDay').value = tx.monthlyDay || parseDate(tx.date).getDate();
@@ -1650,7 +1815,7 @@ function saveEditTransaction(event){
     amount:Number(getEl('editAmount').value),
     title:getEl('editTitle').value.trim(),
     category:getEl('editCategory').value,
-    wishId:getEl('editMode').value === 'budget' ? getEl('editWishId').value : '',
+    planId:getEl('editMode').value === 'budget' ? getEl('editPlanId').value : '',
     repeat,
     weeklyDays:repeat === 'weekly' ? getSelectedWeeklyDays('editWeeklyDay',parsed.getDay()) : [],
     monthlyDay:repeat === 'monthly' ? Number(getEl('editMonthlyDay').value || parsed.getDate()) : null,
@@ -1773,6 +1938,9 @@ function renderCalendar(){
     const items = expandTransactionsForDate(date);
     const budgetTotal = sumSigned(items.filter(item => item.mode === 'budget'));
     const actualTotal = sumSigned(items.filter(item => item.mode === 'actual'));
+    const budgetCount = items.filter(item => item.mode === 'budget').length;
+    const actualCount = items.filter(item => item.mode === 'actual').length;
+    const fixedCount = items.filter(item => item.repeat !== 'none').length;
 
     calendar.insertAdjacentHTML('beforeend',`
       <div class="calendar-day ${dateString === today ? 'today' : ''} ${dateString === selectedDate ? 'selected' : ''}" onclick="selectDate('${dateString}')">
@@ -1787,10 +1955,21 @@ function renderCalendar(){
             <span class="${actualTotal < 0 ? 'minus' : 'actual-text'}">${yen(actualTotal)}</span>
           </div>
         </div>
+        <div class="day-dots">
+          ${renderDotLine('予算',budgetCount,'budget')}
+          ${renderDotLine('実績',actualCount,'actual')}
+          ${renderDotLine('固定',fixedCount,'fixed')}
+        </div>
         ${items.slice(0,2).map(renderCalendarItem).join('')}
       </div>
     `);
   }
+}
+
+function renderDotLine(label,count,type){
+  if(!count) return '';
+  const dots = Array.from({length:Math.min(count,6)},() => `<span class="dot ${type}"></span>`).join('');
+  return `<div class="dot-line"><span>${label}</span>${dots}<span>${count}件</span></div>`;
 }
 
 function renderCalendarItem(item){
@@ -1888,34 +2067,36 @@ function renderHistory(){
     : '<div class="empty">この月の家計データはまだありません</div>';
 }
 
-// ===== Wish / Goal ======================================================
-function openWishForm(type){
-  openForm('wishForm');
-  getEl('wishType').value = type;
-  getEl('wishEditId').value = '';
-  getEl('wishTitle').value = '';
-  getEl('wishTargetAmount').value = '';
-  getEl('wishMemo').value = '';
+// ===== Plan / Goal ======================================================
+function openPlanForm(type){
+  openForm('planForm');
+  getEl('planType').value = type;
+  getEl('planEditId').value = '';
+  getEl('planTitle').value = '';
+  getEl('planTargetAmount').value = '';
+  getEl('planCategory').value = '旅行';
+  getEl('planMemo').value = '';
 }
 
-function saveWish(event){
+function savePlan(event){
   event.preventDefault();
-  const id = getEl('wishEditId').value || makeId();
-  const data = normalizeWish({
+  const id = getEl('planEditId').value || makeId();
+  const data = normalizePlan({
     id,
-    title:getEl('wishTitle').value.trim(),
-    type:getEl('wishType').value,
-    targetAmount:Number(getEl('wishTargetAmount').value),
-    memo:getEl('wishMemo').value.trim(),
-    status:wishList.find(wish => wish.id === id)?.status || 'planned',
-    createdAt:wishList.find(wish => wish.id === id)?.createdAt || Date.now()
+    title:getEl('planTitle').value.trim(),
+    planType:getEl('planType').value,
+    targetAmount:Number(getEl('planTargetAmount').value),
+    category:getEl('planCategory').value,
+    memo:getEl('planMemo').value.trim(),
+    status:planList.find(plan => plan.id === id)?.status || 'active',
+    createdAt:planList.find(plan => plan.id === id)?.createdAt || Date.now()
   });
 
-  const index = wishList.findIndex(wish => wish.id === id);
+  const index = planList.findIndex(plan => plan.id === id);
   if(index >= 0){
-    wishList[index] = data;
+    planList[index] = data;
   }else{
-    wishList.push(data);
+    planList.push(data);
   }
 
   closeAllForms();
@@ -1924,70 +2105,87 @@ function saveWish(event){
   renderAll();
 }
 
-function editWish(id){
-  const wish = wishList.find(item => item.id === id);
-  if(!wish) return;
-  openForm('wishForm');
-  getEl('wishType').value = wish.type;
-  getEl('wishEditId').value = wish.id;
-  getEl('wishTitle').value = wish.title;
-  getEl('wishTargetAmount').value = wish.targetAmount;
-  getEl('wishMemo').value = wish.memo;
+function editPlan(id){
+  const plan = planList.find(item => item.id === id);
+  if(!plan) return;
+  openForm('planForm');
+  getEl('planType').value = plan.planType;
+  getEl('planEditId').value = plan.id;
+  getEl('planTitle').value = plan.title;
+  getEl('planTargetAmount').value = plan.targetAmount;
+  getEl('planCategory').value = plan.category || 'その他';
+  getEl('planMemo').value = plan.memo;
 }
 
-function deleteWish(id){
+function deletePlan(id){
   const ok = confirm('この計画を削除しますか？ 関連付けられた予算は「関連なし」に戻ります。');
   if(!ok) return;
-  wishList = wishList.filter(wish => wish.id !== id);
-  transactions = transactions.map(tx => tx.wishId === id ? {...tx,wishId:''} : tx);
+  planList = planList.filter(plan => plan.id !== id);
+  transactions = transactions.map(tx => tx.planId === id ? {...tx,planId:''} : tx);
   saveData();
   buildTransactionForms();
   renderAll();
 }
 
-function toggleWishDone(id){
-  const wish = wishList.find(item => item.id === id);
-  if(!wish) return;
-  wish.status = wish.status === 'done' ? 'planned' : 'done';
+function togglePlanDone(id){
+  const plan = planList.find(item => item.id === id);
+  if(!plan) return;
+  plan.status = plan.status === 'done' ? 'active' : 'done';
   saveData();
-  renderWishList();
+  renderPlanList();
 }
 
-function getWishPlannedAmount(wishId){
+function getPlanPlannedAmount(planId){
   return transactions
-    .filter(tx => tx.mode === 'budget' && tx.wishId === wishId)
+    .filter(tx => tx.mode === 'budget' && tx.planId === planId)
     .reduce((sum,tx) => sum + Math.abs(tx.amount),0);
 }
 
-function renderWishList(){
-  getEl('wishListView').innerHTML = wishList.length
-    ? wishList.map(wish => {
-      const planned = getWishPlannedAmount(wish.id);
-      const percent = wish.targetAmount ? Math.min(100,Math.round(planned / wish.targetAmount * 100)) : 0;
+function renderPlanList(){
+  const totalNeed = planList.reduce((sum,plan) => sum + plan.targetAmount,0);
+  const totalPlanned = planList.reduce((sum,plan) => sum + getPlanPlannedAmount(plan.id),0);
+  const totalRemain = Math.max(0,totalNeed - totalPlanned);
+
+  getEl('planListView').innerHTML = planList.length
+    ? `
+      <div class="plan-summary">
+        <div><span>合計必要金額</span><strong>${yen(totalNeed)}</strong></div>
+        <div><span>合計計画済み</span><strong>${yen(totalPlanned)}</strong></div>
+        <div><span>残必要金額</span><strong>${yen(totalRemain)}</strong></div>
+      </div>
+      ${planList.map(plan => {
+      const planned = getPlanPlannedAmount(plan.id);
+      const percent = plan.targetAmount ? Math.min(100,Math.round(planned / plan.targetAmount * 100)) : 0;
       return `
-        <div class="wish-card ${wish.status === 'done' ? 'done' : ''}">
-          <h3>${wish.title}</h3>
-          <div class="wish-meta">
-            ${wish.type === 'buy' ? '買うもの' : 'やりたいこと'} / ${wish.status === 'done' ? '達成済み' : '未達成'}<br>
-            目標: ${yen(wish.targetAmount)}<br>
-            現在計画済み: ${yen(planned)}
+        <div class="plan-card ${plan.status === 'done' ? 'done' : ''}">
+          <h3>${plan.title}</h3>
+          <div class="plan-meta">
+            ${plan.planType === 'buy' ? '買いたいもの' : 'やりたいこと'} / ${plan.category} / ${plan.status === 'done' ? '達成済み' : '進行中'}<br>
+            必要: ${yen(plan.targetAmount)}<br>
+            現在予算: ${yen(planned)}
           </div>
           <div class="progress-track">
             <div class="progress-bar" style="width:${percent}%"></div>
           </div>
-          <div class="wish-meta">${percent}%</div>
-          ${wish.memo ? `<div class="wish-meta">${wish.memo}</div>` : ''}
-          <div class="wish-actions">
-            <button class="mini-button btn-light" onclick="editWish('${wish.id}')">編集</button>
-            <button class="mini-button btn-delete" onclick="deleteWish('${wish.id}')">削除</button>
-            <button class="mini-button btn-actual" onclick="toggleWishDone('${wish.id}')">
-              ${wish.status === 'done' ? '未達成に戻す' : '達成済み'}
+          <div class="plan-dots">${renderProgressDots(percent)}</div>
+          <div class="plan-meta">達成率: ${percent}%</div>
+          ${plan.memo ? `<div class="plan-meta">${plan.memo}</div>` : ''}
+          <div class="plan-actions">
+            <button class="mini-button btn-light" onclick="editPlan('${plan.id}')">編集</button>
+            <button class="mini-button btn-delete" onclick="deletePlan('${plan.id}')">削除</button>
+            <button class="mini-button btn-actual" onclick="togglePlanDone('${plan.id}')">
+              ${plan.status === 'done' ? '進行中に戻す' : '達成済み'}
             </button>
           </div>
         </div>
       `;
-    }).join('')
-    : '<div class="empty">買うもの / やりたいことはまだありません</div>';
+    }).join('')}`
+    : '<div class="empty">計画一覧はまだありません</div>';
+}
+
+function renderProgressDots(percent){
+  const filled = Math.round(percent / 12.5);
+  return Array.from({length:8},(_,index) => index < filled ? '●' : '○').join('');
 }
 
 // ===== 日記 =============================================================
@@ -2043,7 +2241,7 @@ function renderAll(){
   renderSummary();
   renderCalendar();
   renderSelectedDateDetails(selectedDate);
-  renderWishList();
+  renderPlanList();
   renderHistory();
   renderDiaries();
 }
