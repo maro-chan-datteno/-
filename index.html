@@ -25,6 +25,8 @@
   --soft-actual:#f0faf7;
   --soft-plan:#f6f2ff;
   --soft-gray:#f8f9fb;
+  --placeholder:#9ca3af;
+  --tag-bg:#eef2f7;
   --shadow:0 14px 36px rgba(31,41,55,.09);
   --focus-ring:0 0 0 3px rgba(37,99,235,.14);
 }
@@ -68,6 +70,11 @@ select{
   -webkit-user-select:text;
   user-select:text;
   -webkit-touch-callout:default;
+}
+
+input::placeholder,
+textarea::placeholder{
+  color:var(--placeholder);
 }
 
 .app{
@@ -621,9 +628,9 @@ textarea{
   max-width:100%;
   padding:3px 8px;
   border-radius:999px;
-  background:#eef2f7;
+  background:var(--tag-bg);
   font-size:12px;
-  color:#334155;
+  color:var(--text);
 }
 
 .diary-card{
@@ -637,32 +644,41 @@ textarea{
   gap:10px;
 }
 
-.plan-summary{
-  grid-column:1/-1;
-  display:grid;
-  grid-template-columns:repeat(3,minmax(0,1fr));
-  gap:8px;
-  margin-bottom:4px;
+.accordion-panel{
+  overflow:hidden;
 }
 
-.plan-summary div{
-  padding:12px;
-  border:1px solid var(--line);
-  border-radius:16px;
-  background:var(--soft-gray);
+.accordion-title{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  gap:12px;
+  padding:14px 2px;
+  border:0;
+  background:transparent;
+  color:var(--text);
+  font-size:18px;
+  font-weight:900;
+  text-align:left;
 }
 
-.plan-summary span{
-  display:block;
+.accordion-title::before{
+  content:"▶";
   color:var(--muted);
-  font-size:12px;
-  font-weight:800;
+  font-size:14px;
 }
 
-.plan-summary strong{
+.accordion-title.open::before{
+  content:"▼";
+}
+
+.accordion-content{
+  display:none;
+}
+
+.accordion-content.open{
   display:block;
-  margin-top:4px;
-  font-size:16px;
 }
 
 .plan-card{
@@ -689,30 +705,6 @@ textarea{
   color:var(--muted);
   font-size:13px;
   line-height:1.5;
-}
-
-.progress-track{
-  width:100%;
-  height:10px;
-  margin:10px 0 6px;
-  border-radius:999px;
-  background:#e8edf3;
-  overflow:hidden;
-}
-
-.progress-bar{
-  height:100%;
-  width:0%;
-  border-radius:999px;
-  background:linear-gradient(90deg,var(--plan),var(--income));
-  transition:width .35s ease;
-}
-
-.plan-dots{
-  color:var(--plan);
-  letter-spacing:2px;
-  font-size:17px;
-  line-height:1.3;
 }
 
 .plan-actions{
@@ -844,10 +836,6 @@ textarea{
     grid-template-columns:1fr;
   }
 
-  .plan-summary{
-    grid-template-columns:1fr;
-  }
-
   #calendar{
     gap:4px;
   }
@@ -932,6 +920,7 @@ textarea{
         <button type="button" onclick="selectMood(this,'😓')">😓</button>
         <button type="button" onclick="selectMood(this,'😡')">😡</button>
       </div>
+      <input type="hidden" id="diaryEditId">
       <input type="hidden" id="mood">
       <textarea id="diaryInput" placeholder="今日の出来事"></textarea>
       <button class="full-button btn-diary" onclick="saveDiary()" type="button">日記保存</button>
@@ -939,6 +928,7 @@ textarea{
 
     <div class="menu-title">計画メニュー</div>
     <button class="full-button btn-plan" onclick="openPlanForm('buy')">計画を追加</button>
+    <button class="full-button btn-light" onclick="showPlanModal()">計画リストを見る</button>
     <form id="planForm" class="entry-form plan" onsubmit="savePlan(event)">
       <input type="hidden" id="planEditId">
       <label for="planTitle">タイトル</label>
@@ -971,21 +961,26 @@ textarea{
 
     <div class="panel detail-panel" id="selectedDatePanel"></div>
 
-    <div class="panel">
-      <h2 class="section-title">計画一覧</h2>
-      <div id="planListView" class="plan-grid"></div>
-    </div>
-
-    <div class="panel">
-      <h2 class="section-title">家計履歴</h2>
+    <div class="panel accordion-panel">
+      <button class="accordion-title" onclick="toggleRightAccordion('historyList')">家計履歴</button>
       <div id="historyList"></div>
     </div>
 
-    <div class="panel">
-      <h2 class="section-title">日記履歴</h2>
+    <div class="panel accordion-panel">
+      <button class="accordion-title" onclick="toggleRightAccordion('diaryList')">日記履歴</button>
       <div id="diaryList"></div>
     </div>
   </section>
+</div>
+
+<div id="planModal" class="modal-backdrop" onclick="closePlanModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="detail-header">
+      <h2 class="section-title">計画リスト</h2>
+      <button class="mini-button btn-light" type="button" onclick="hidePlanModal()">閉じる</button>
+    </div>
+    <div id="planListView" class="plan-grid"></div>
+  </div>
 </div>
 
 <div id="editModal" class="modal-backdrop" onclick="closeEditModal(event)">
@@ -1088,7 +1083,7 @@ const STORAGE = {
   theme: 'kakeiboTheme'
 };
 
-const CATEGORIES = ['食費','日用品','交通費','娯楽','固定費','給与','旅行','学習','美容','健康','その他'];
+const CATEGORIES = ['食費','日用品','交通費','娯楽','固定費','給与','旅行','ゲーム','学習','美容','健康','その他'];
 const WEEKDAYS = ['日','月','火','水','木','金','土'];
 const THEMES = {
   blue:{
@@ -1179,10 +1174,10 @@ const THEMES = {
     '--bg':'#111827',
     '--panel':'#1f2937',
     '--text':'#f9fafb',
-    '--muted':'#cbd5e1',
-    '--line':'#475569',
+    '--muted':'#d1d5db',
+    '--line':'#374151',
     '--income':'#60a5fa',
-    '--expense':'#fb7185',
+    '--expense':'#f87171',
     '--budget':'#fbbf24',
     '--actual':'#34d399',
     '--diary':'#4ade80',
@@ -1194,6 +1189,8 @@ const THEMES = {
     '--soft-actual':'#12382f',
     '--soft-plan':'#31224a',
     '--soft-gray':'#273449',
+    '--placeholder':'#9ca3af',
+    '--tag-bg':'#374151',
     '--focus-ring':'0 0 0 3px rgba(96,165,250,.20)'
   }
 };
@@ -1397,6 +1394,8 @@ function setup(){
   renderWeeklyCheckboxes('editWeeklyDays','editWeeklyDay');
   setupMenus();
   renderAll();
+  getEl('historyList').classList.add('accordion-content');
+  getEl('diaryList').classList.add('accordion-content');
 }
 
 // 左パネルの各メニューを起動時に折りたたみグループ化します。
@@ -1419,6 +1418,13 @@ function setupMenus(){
     title.after(body);
     title.addEventListener('click',() => toggleMenuBody(title,body));
   });
+}
+
+function toggleRightAccordion(id){
+  const content = getEl(id);
+  const button = content.previousElementSibling;
+  content.classList.toggle('open');
+  button.classList.toggle('open');
 }
 
 function toggleMenuBody(title,body){
@@ -1960,7 +1966,6 @@ function renderCalendar(){
           ${renderDotLine('実績',actualCount,'actual')}
           ${renderDotLine('固定',fixedCount,'fixed')}
         </div>
-        ${items.slice(0,2).map(renderCalendarItem).join('')}
       </div>
     `);
   }
@@ -1990,8 +1995,9 @@ function renderCalendarItem(item){
 
 function renderSelectedDateDetails(dateString){
   const items = expandTransactionsForDate(parseDate(dateString));
-  const budgets = items.filter(item => item.mode === 'budget');
-  const actuals = items.filter(item => item.mode === 'actual');
+  const budgets = items.filter(item => item.mode === 'budget' && item.repeat === 'none');
+  const actuals = items.filter(item => item.mode === 'actual' && item.repeat === 'none');
+  const fixed = items.filter(item => item.repeat !== 'none');
   const label = `${parseDate(dateString).getMonth() + 1}/${parseDate(dateString).getDate()}`;
 
   getEl('selectedDatePanel').innerHTML = `
@@ -2007,11 +2013,16 @@ function renderSelectedDateDetails(dateString){
       <h3>その日の実績</h3>
       ${actuals.length ? actuals.map(renderDetailItem).join('') : '<div class="empty">実績はありません</div>'}
     </div>
+    <div class="detail-group">
+      <h3>固定費 / 繰り返し</h3>
+      ${fixed.length ? fixed.map(renderDetailItem).join('') : '<div class="empty">固定費はありません</div>'}
+    </div>
   `;
 }
 
 function renderDetailItem(item){
   const amount = signedAmount(item);
+  const plan = item.planId ? planList.find(plan => plan.id === item.planId) : null;
   return `
     <div class="detail-item ${item.mode}">
       <div class="history-head">
@@ -2022,6 +2033,7 @@ function renderDetailItem(item){
       <div class="tag-row">
         <span class="tag">${item.category}</span>
         <span class="tag">${item.occurrenceDate}</span>
+        ${plan ? `<span class="tag">計画: ${plan.title}</span>` : ''}
       </div>
       <div class="history-amount ${amount < 0 ? 'minus' : 'plus'}">${yen(amount)}</div>
       <div class="detail-actions">
@@ -2108,6 +2120,7 @@ function savePlan(event){
 function editPlan(id){
   const plan = planList.find(item => item.id === id);
   if(!plan) return;
+  hidePlanModal();
   openForm('planForm');
   getEl('planType').value = plan.planType;
   getEl('planEditId').value = plan.id;
@@ -2135,6 +2148,21 @@ function togglePlanDone(id){
   renderPlanList();
 }
 
+function showPlanModal(){
+  renderPlanList();
+  getEl('planModal').classList.add('show');
+}
+
+function closePlanModal(event){
+  if(event.target.id === 'planModal'){
+    hidePlanModal();
+  }
+}
+
+function hidePlanModal(){
+  getEl('planModal').classList.remove('show');
+}
+
 function getPlanPlannedAmount(planId){
   return transactions
     .filter(tx => tx.mode === 'budget' && tx.planId === planId)
@@ -2142,50 +2170,28 @@ function getPlanPlannedAmount(planId){
 }
 
 function renderPlanList(){
-  const totalNeed = planList.reduce((sum,plan) => sum + plan.targetAmount,0);
-  const totalPlanned = planList.reduce((sum,plan) => sum + getPlanPlannedAmount(plan.id),0);
-  const totalRemain = Math.max(0,totalNeed - totalPlanned);
-
   getEl('planListView').innerHTML = planList.length
-    ? `
-      <div class="plan-summary">
-        <div><span>合計必要金額</span><strong>${yen(totalNeed)}</strong></div>
-        <div><span>合計計画済み</span><strong>${yen(totalPlanned)}</strong></div>
-        <div><span>残必要金額</span><strong>${yen(totalRemain)}</strong></div>
-      </div>
-      ${planList.map(plan => {
-      const planned = getPlanPlannedAmount(plan.id);
-      const percent = plan.targetAmount ? Math.min(100,Math.round(planned / plan.targetAmount * 100)) : 0;
+    ? planList.map(plan => {
       return `
         <div class="plan-card ${plan.status === 'done' ? 'done' : ''}">
           <h3>${plan.title}</h3>
           <div class="plan-meta">
-            ${plan.planType === 'buy' ? '買いたいもの' : 'やりたいこと'} / ${plan.category} / ${plan.status === 'done' ? '達成済み' : '進行中'}<br>
-            必要: ${yen(plan.targetAmount)}<br>
-            現在予算: ${yen(planned)}
+            ${plan.planType === 'buy' ? '買いたいもの' : 'やりたいこと'} / ${plan.status === 'done' ? '達成済み' : '未完了'}<br>
+            カテゴリ: ${plan.category}<br>
+            予定金額: ${yen(plan.targetAmount)}
           </div>
-          <div class="progress-track">
-            <div class="progress-bar" style="width:${percent}%"></div>
-          </div>
-          <div class="plan-dots">${renderProgressDots(percent)}</div>
-          <div class="plan-meta">達成率: ${percent}%</div>
           ${plan.memo ? `<div class="plan-meta">${plan.memo}</div>` : ''}
           <div class="plan-actions">
             <button class="mini-button btn-light" onclick="editPlan('${plan.id}')">編集</button>
             <button class="mini-button btn-delete" onclick="deletePlan('${plan.id}')">削除</button>
             <button class="mini-button btn-actual" onclick="togglePlanDone('${plan.id}')">
-              ${plan.status === 'done' ? '進行中に戻す' : '達成済み'}
+              ${plan.status === 'done' ? '未完了に戻す' : '完了'}
             </button>
           </div>
         </div>
       `;
-    }).join('')}`
+    }).join('')
     : '<div class="empty">計画一覧はまだありません</div>';
-}
-
-function renderProgressDots(percent){
-  const filled = Math.round(percent / 12.5);
-  return Array.from({length:8},(_,index) => index < filled ? '●' : '○').join('');
 }
 
 // ===== 日記 =============================================================
@@ -2199,20 +2205,39 @@ function saveDiary(){
   const text = getEl('diaryInput').value.trim();
   if(!text) return;
 
-  diaries.unshift({
-    id:makeId(),
-    date:today,
-    mood:getEl('mood').value || '😐',
-    text,
-    createdAt:Date.now()
-  });
+  const editId = getEl('diaryEditId').value;
+  if(editId){
+    const diary = diaries.find(item => item.id === editId);
+    if(diary){
+      diary.text = text;
+      diary.mood = getEl('mood').value || diary.mood || '😐';
+    }
+  }else{
+    diaries.unshift({
+      id:makeId(),
+      date:today,
+      mood:getEl('mood').value || '😐',
+      text,
+      createdAt:Date.now()
+    });
+  }
 
   getEl('diaryInput').value = '';
   getEl('mood').value = '';
+  getEl('diaryEditId').value = '';
   document.querySelectorAll('#moodSelect button').forEach(btn => btn.classList.remove('active'));
   closeAllForms();
   saveData();
   renderDiaries();
+}
+
+function editDiary(index){
+  const diary = diaries[index];
+  if(!diary) return;
+  openForm('diaryForm');
+  getEl('diaryEditId').value = diary.id;
+  getEl('diaryInput').value = diary.text;
+  getEl('mood').value = diary.mood || '😐';
 }
 
 function deleteDiary(index){
@@ -2230,6 +2255,7 @@ function renderDiaries(){
           <span>${diary.mood}</span>
         </div>
         <div>${diary.text}</div>
+        <button class="mini-button btn-light" onclick="editDiary(${index})">編集</button>
         <button class="mini-button btn-delete" onclick="deleteDiary(${index})">削除</button>
       </div>
     `).join('')
