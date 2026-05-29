@@ -31,6 +31,122 @@
   --focus-ring:0 0 0 3px rgba(37,99,235,.14);
 }
 
+body[data-theme="minimal"]{
+  --bg:#f3f4f6;
+  --panel:#ffffff;
+  --card:#ffffff;
+  --text:#111827;
+  --muted:#4b5563;
+  --subtext:#4b5563;
+  --line:#d1d5db;
+  --accent:#2563eb;
+  --income:#2563eb;
+  --expense:#dc2626;
+  --budget:#d97706;
+  --actual:#059669;
+  --diary:#16a34a;
+  --plan:#8b5cf6;
+  --dark:#374151;
+  --soft-income:#eff6ff;
+  --soft-expense:#fff1f2;
+  --soft-budget:#fff7ed;
+  --soft-actual:#ecfdf5;
+  --soft-plan:#f5f3ff;
+  --soft-gray:#f9fafb;
+  --placeholder:#6b7280;
+  --tag-bg:#eef2f7;
+  --button-text:#ffffff;
+  --shadow:0 14px 36px rgba(31,41,55,.09);
+  --focus-ring:0 0 0 3px rgba(37,99,235,.14);
+}
+
+body[data-theme="tokyo"]{
+  --bg:#111827;
+  --panel:#1f2937;
+  --card:#1f2937;
+  --text:#f9fafb;
+  --muted:#d1d5db;
+  --subtext:#d1d5db;
+  --line:#374151;
+  --accent:#60a5fa;
+  --income:#60a5fa;
+  --expense:#f87171;
+  --budget:#fbbf24;
+  --actual:#34d399;
+  --diary:#4ade80;
+  --plan:#c084fc;
+  --dark:#0f172a;
+  --soft-income:#172554;
+  --soft-expense:#451a1a;
+  --soft-budget:#422006;
+  --soft-actual:#064e3b;
+  --soft-plan:#3b0764;
+  --soft-gray:#273449;
+  --placeholder:#9ca3af;
+  --tag-bg:#374151;
+  --button-text:#ffffff;
+  --shadow:0 18px 48px rgba(0,0,0,.28);
+  --focus-ring:0 0 0 3px rgba(96,165,250,.22);
+}
+
+body[data-theme="paper"]{
+  --bg:#f6f1e7;
+  --panel:#fffdf8;
+  --card:#fffdf8;
+  --text:#3f3a34;
+  --muted:#6b6257;
+  --subtext:#6b6257;
+  --line:#d8cfc2;
+  --accent:#8b5cf6;
+  --income:#4f6fbd;
+  --expense:#b45353;
+  --budget:#b7791f;
+  --actual:#4d7c5f;
+  --diary:#5f8c5a;
+  --plan:#8b5cf6;
+  --dark:#5f5449;
+  --soft-income:#f1edff;
+  --soft-expense:#fff4ee;
+  --soft-budget:#fff6df;
+  --soft-actual:#eef7ef;
+  --soft-plan:#f4efff;
+  --soft-gray:#fbf7ee;
+  --placeholder:#8a8175;
+  --tag-bg:#f0e8db;
+  --button-text:#ffffff;
+  --shadow:0 14px 30px rgba(63,58,52,.10);
+  --focus-ring:0 0 0 3px rgba(139,92,246,.16);
+}
+
+body[data-theme="retro"]{
+  --bg:#cad2a0;
+  --panel:#dde5b6;
+  --card:#dde5b6;
+  --text:#23301b;
+  --muted:#3f5a2a;
+  --subtext:#3f5a2a;
+  --line:#7b8f52;
+  --accent:#556b2f;
+  --income:#405d27;
+  --expense:#7b2f2f;
+  --budget:#6f5f1e;
+  --actual:#3f6b34;
+  --diary:#426d31;
+  --plan:#4e5f2d;
+  --dark:#23301b;
+  --soft-income:#c3d39b;
+  --soft-expense:#dcc09a;
+  --soft-budget:#e5d58d;
+  --soft-actual:#c5dba1;
+  --soft-plan:#c8d49f;
+  --soft-gray:#d5deb0;
+  --placeholder:#4f6635;
+  --tag-bg:#c3ce94;
+  --button-text:#f3f8d8;
+  --shadow:4px 4px 0 rgba(35,48,27,.25);
+  --focus-ring:0 0 0 3px rgba(85,107,47,.28);
+}
+
 *,
 *::before,
 *::after{box-sizing:border-box;}
@@ -165,7 +281,7 @@ button{
   min-height:44px;
   border:0;
   border-radius:13px;
-  color:white;
+  color:var(--button-text);
   font-weight:850;
   cursor:pointer;
   touch-action:manipulation;
@@ -205,7 +321,7 @@ button:disabled{
 .btn-month{background:var(--dark);}
 .btn-light{
   background:#eef2f7;
-  color:#263241;
+  color:var(--text);
 }
 
 input,select,textarea{
@@ -297,8 +413,36 @@ textarea{
   margin-top:0;
 }
 
-.theme-select{
-  margin-bottom:0;
+.theme-buttons{
+  display:grid;
+  grid-template-columns:repeat(4,minmax(0,1fr));
+  gap:6px;
+}
+
+.theme-buttons button{
+  min-height:40px;
+  padding:8px 6px;
+  border:1px solid var(--line);
+  background:var(--panel);
+  color:var(--text);
+  font-size:12px;
+}
+
+.theme-buttons button.active{
+  border-color:var(--accent);
+  background:var(--accent);
+  color:var(--button-text);
+}
+
+body[data-theme="retro"] .mini-button,
+body[data-theme="retro"] .tag,
+body[data-theme="retro"] .theme-buttons button{
+  border-radius:4px;
+  box-shadow:2px 2px 0 rgba(35,48,27,.22);
+}
+
+body[data-theme="retro"] .dot{
+  border-radius:2px;
 }
 
 .weekday-grid{
@@ -380,7 +524,7 @@ textarea{
   min-width:0;
   padding:10px;
   border-radius:14px;
-  background:#fff;
+  background:var(--panel);
   border:1px solid #e5e7eb;
 }
 
@@ -408,9 +552,95 @@ textarea{
   font-weight:900;
 }
 
+.analysis-box{
+  margin-top:12px;
+  border-top:1px solid var(--line);
+  padding-top:10px;
+}
+
+.analysis-toggle{
+  width:100%;
+  display:flex;
+  align-items:center;
+  justify-content:space-between;
+  padding:10px 0;
+  border:0;
+  background:transparent;
+  color:var(--text);
+  font-size:15px;
+  font-weight:900;
+  text-align:left;
+}
+
+.analysis-toggle::before{
+  content:"▶";
+  color:var(--muted);
+  margin-right:6px;
+}
+
+.analysis-toggle.open::before{
+  content:"▼";
+}
+
+.analysis-content{
+  display:none;
+  padding-top:8px;
+}
+
+.analysis-content.open{
+  display:block;
+}
+
+.stacked-bar{
+  display:flex;
+  width:100%;
+  height:16px;
+  overflow:hidden;
+  border:1px solid var(--line);
+  border-radius:999px;
+  background:var(--soft-gray);
+}
+
+.stacked-segment{
+  min-width:2px;
+  height:100%;
+}
+
+.analysis-row{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:10px;
+  padding:8px 0;
+  border-bottom:1px solid var(--line);
+  font-size:13px;
+}
+
+.analysis-row:last-child{
+  border-bottom:0;
+}
+
+.analysis-name{
+  display:flex;
+  align-items:center;
+  gap:6px;
+  min-width:0;
+}
+
+.analysis-dot{
+  width:9px;
+  height:9px;
+  border-radius:50%;
+  flex:0 0 auto;
+}
+
+.analysis-over{
+  color:var(--expense);
+  font-weight:900;
+}
+
 .plus{color:var(--income);}
 .minus{color:var(--expense);}
-.budget-text{color:#a16207;}
+.budget-text{color:var(--budget);}
 .actual-text{color:var(--actual);}
 
 #calendar{
@@ -433,7 +663,7 @@ textarea{
   padding:7px;
   border:1px solid #e5e7eb;
   border-radius:13px;
-  background:#fff;
+  background:var(--panel);
   overflow:hidden;
   cursor:pointer;
 }
@@ -582,7 +812,7 @@ textarea{
   padding:12px;
   border:1px solid #e5e7eb;
   border-radius:15px;
-  background:#fff;
+  background:var(--panel);
 }
 
 .detail-item.budget{
@@ -728,8 +958,8 @@ textarea{
 
 #moodSelect button{
   border:1px solid var(--line);
-  background:#fff;
-  color:#111827;
+  background:var(--panel);
+  color:var(--text);
   font-size:22px;
 }
 
@@ -768,7 +998,7 @@ textarea{
   overflow:auto;
   padding:18px;
   border-radius:22px;
-  background:#fff;
+  background:var(--panel);
   box-shadow:0 24px 60px rgba(15,23,42,.28);
 }
 
@@ -874,14 +1104,13 @@ textarea{
     <h1 class="panel-title">家計入力</h1>
 
     <div class="theme-box">
-      <label for="themeSelect">テーマカラー</label>
-      <select id="themeSelect" class="theme-select" onchange="changeTheme(this.value)">
-        <option value="blue">ブルー</option>
-        <option value="green">グリーン</option>
-        <option value="purple">パープル</option>
-        <option value="orange">オレンジ</option>
-        <option value="dark">ダーク</option>
-      </select>
+      <label>テーマ</label>
+      <div class="theme-buttons">
+        <button type="button" data-theme-button="minimal" onclick="changeTheme('minimal')">Minimal</button>
+        <button type="button" data-theme-button="tokyo" onclick="changeTheme('tokyo')">Tokyo</button>
+        <button type="button" data-theme-button="paper" onclick="changeTheme('paper')">Paper</button>
+        <button type="button" data-theme-button="retro" onclick="changeTheme('retro')">Retro</button>
+      </div>
     </div>
 
     <div class="menu-title">予算メニュー</div>
@@ -959,8 +1188,6 @@ textarea{
       <div id="calendar"></div>
     </div>
 
-    <div class="panel detail-panel" id="selectedDatePanel"></div>
-
     <div class="panel accordion-panel">
       <button class="accordion-title" onclick="toggleRightAccordion('historyList')">家計履歴</button>
       <div id="historyList"></div>
@@ -971,6 +1198,12 @@ textarea{
       <div id="diaryList"></div>
     </div>
   </section>
+</div>
+
+<div id="dateDetailModal" class="modal-backdrop" onclick="closeDateDetailModal(event)">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div id="selectedDatePanel" class="detail-panel"></div>
+  </div>
 </div>
 
 <div id="planModal" class="modal-backdrop" onclick="closePlanModal(event)">
@@ -1084,6 +1317,19 @@ const STORAGE = {
 };
 
 const CATEGORIES = ['食費','日用品','交通費','娯楽','固定費','給与','旅行','ゲーム','学習','美容','健康','その他'];
+const CATEGORY_COLORS = {
+  '食費':'#f59e0b',
+  '固定費':'#3b82f6',
+  'ゲーム':'#8b5cf6',
+  '娯楽':'#8b5cf6',
+  '交通費':'#10b981',
+  '日用品':'#ef4444',
+  '旅行':'#06b6d4',
+  '学習':'#6366f1',
+  '美容':'#ec4899',
+  '健康':'#059669',
+  'その他':'#6b7280'
+};
 const WEEKDAYS = ['日','月','火','水','木','金','土'];
 const THEMES = {
   blue:{
@@ -1366,22 +1612,29 @@ function saveData(){
 // ===== テーマ管理 =======================================================
 // CSS変数だけを差し替えるので、HTML構造を壊さず色だけ変更できます。
 function applyTheme(themeName){
-  const theme = THEMES[themeName] || THEMES.blue;
-  Object.entries(theme).forEach(([key,value]) => {
-    document.documentElement.style.setProperty(key,value);
+  const aliases = {
+    blue:'minimal',
+    green:'minimal',
+    purple:'paper',
+    orange:'paper',
+    dark:'tokyo'
+  };
+  const normalized = aliases[themeName] || themeName || 'minimal';
+  const allowed = ['minimal','tokyo','paper','retro'];
+  const theme = allowed.includes(normalized) ? normalized : 'minimal';
+  document.body.dataset.theme = theme;
+  document.querySelectorAll('[data-theme-button]').forEach(button => {
+    button.classList.toggle('active',button.dataset.themeButton === theme);
   });
-  if(getEl('themeSelect')){
-    getEl('themeSelect').value = THEMES[themeName] ? themeName : 'blue';
-  }
 }
 
 function changeTheme(themeName){
-  localStorage.setItem(STORAGE.theme,themeName);
   applyTheme(themeName);
+  localStorage.setItem(STORAGE.theme,document.body.dataset.theme || 'minimal');
 }
 
 function loadTheme(){
-  applyTheme(localStorage.getItem(STORAGE.theme) || 'blue');
+  applyTheme(localStorage.getItem(STORAGE.theme) || 'minimal');
 }
 
 // ===== フォーム管理 =====================================================
@@ -1890,6 +2143,12 @@ function renderSummary(){
         <span>差額</span>
         <span class="${s.variance < 0 ? 'minus' : 'plus'}">${yen(s.variance)}</span>
       </div>
+      <div class="analysis-box">
+        <button class="analysis-toggle" onclick="toggleAnalysis()">支出分析</button>
+        <div id="expenseAnalysis" class="analysis-content">
+          ${renderExpenseAnalysis()}
+        </div>
+      </div>
     </div>
   `;
 }
@@ -1901,6 +2160,71 @@ function summaryCard(label,value,className){
       <strong class="${className}">${yen(value)}</strong>
     </div>
   `;
+}
+
+function toggleAnalysis(){
+  const content = getEl('expenseAnalysis');
+  const button = content.previousElementSibling;
+  content.classList.toggle('open');
+  button.classList.toggle('open');
+}
+
+function getCategoryExpenseAnalysis(){
+  const items = expandTransactionsForMonth(calendarYear,calendarMonth);
+  const map = new Map();
+
+  items.forEach(item => {
+    if(item.type !== 'expense') return;
+    const category = item.category || 'その他';
+    if(!map.has(category)){
+      map.set(category,{category,budget:0,actual:0});
+    }
+    const row = map.get(category);
+    row[item.mode] += Math.abs(item.amount);
+  });
+
+  const rows = [...map.values()];
+  const actualTotal = rows.reduce((sum,row) => sum + row.actual,0);
+  const budgetTotal = rows.reduce((sum,row) => sum + row.budget,0);
+  const basis = actualTotal || budgetTotal || 0;
+
+  return rows
+    .map(row => ({
+      ...row,
+      percent:basis ? Math.round(((row.actual || row.budget) / basis) * 100) : 0,
+      color:CATEGORY_COLORS[row.category] || CATEGORY_COLORS['その他']
+    }))
+    .sort((a,b) => (b.actual || b.budget) - (a.actual || a.budget));
+}
+
+function renderExpenseAnalysis(){
+  const rows = getCategoryExpenseAnalysis();
+  if(!rows.length){
+    return '<div class="empty">この月の支出データはまだありません</div>';
+  }
+
+  const bar = `
+    <div class="stacked-bar">
+      ${rows.map(row => `<div class="stacked-segment" style="width:${row.percent}%;background:${row.color}"></div>`).join('')}
+    </div>
+  `;
+
+  const details = rows.map(row => {
+    const over = row.actual > row.budget && row.budget > 0;
+    return `
+      <div class="analysis-row">
+        <div class="analysis-name">
+          <span class="analysis-dot" style="background:${row.color}"></span>
+          <span>${row.category} ${row.percent}%</span>
+        </div>
+        <div class="${over ? 'analysis-over' : ''}">
+          予算 ${yen(row.budget)} / 実績 ${yen(row.actual)}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  return bar + details;
 }
 
 // ===== カレンダー / 選択日 ==============================================
@@ -1924,6 +2248,21 @@ function changeMonth(diff){
 function selectDate(dateString){
   selectedDate = dateString;
   renderAll();
+  showDateDetailModal();
+}
+
+function showDateDetailModal(){
+  getEl('dateDetailModal').classList.add('show');
+}
+
+function closeDateDetailModal(event){
+  if(event.target.id === 'dateDetailModal'){
+    hideDateDetailModal();
+  }
+}
+
+function hideDateDetailModal(){
+  getEl('dateDetailModal').classList.remove('show');
 }
 
 function renderCalendar(){
@@ -2003,7 +2342,7 @@ function renderSelectedDateDetails(dateString){
   getEl('selectedDatePanel').innerHTML = `
     <div class="detail-header">
       <h2 class="section-title">${label} の詳細</h2>
-      <span class="tag">${dateString}</span>
+      <button class="mini-button btn-light" onclick="hideDateDetailModal()">閉じる</button>
     </div>
     <div class="detail-group">
       <h3>その日の予算</h3>
